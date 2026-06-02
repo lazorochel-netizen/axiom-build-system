@@ -32,6 +32,26 @@ export async function uncompleteTask(taskId: string, vehicleToken: string) {
   revalidatePath(`/job/${vehicleToken}`)
 }
 
+export async function updateTask(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const taskId    = formData.get('task_id') as string
+  const vehicleId = formData.get('vehicle_id') as string
+  const status    = formData.get('status') as string
+  const assignedTo = formData.get('assigned_to') as string || null
+
+  await supabase.from('tasks').update({
+    status,
+    assigned_to: assignedTo,
+    ...(status === 'completed' ? { completed_by: user.id, completed_at: new Date().toISOString() } : {}),
+    ...(status !== 'completed' ? { completed_by: null, completed_at: null } : {}),
+  }).eq('id', taskId)
+
+  revalidatePath(`/ops/jobs/${vehicleId}`)
+}
+
 export async function addTask(formData: FormData) {
   const supabase = await createClient()
 

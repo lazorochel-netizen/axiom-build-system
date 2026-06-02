@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { addTask } from '@/actions/tasks'
 import type { TaskStatus } from '@/types/database'
+import TaskRow from '@/components/TaskRow'
 
 const TASK_STATUS_COLOURS: Record<TaskStatus, string> = {
   pending:     'bg-slate-100 text-slate-600',
@@ -123,16 +124,13 @@ export default async function JobDetailPage({
           <p className="text-sm text-slate-400 mb-4">No tasks added yet.</p>
         ) : (
           <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100 mb-4">
-            {tasks.map((task: { id: string; task_name: string; task_category: string; status: TaskStatus }) => (
-              <div key={task.id} className="flex items-center justify-between px-4 py-3">
-                <div>
-                  <p className="text-sm font-medium text-slate-900">{task.task_name}</p>
-                  <p className="text-xs text-slate-400">{task.task_category}</p>
-                </div>
-                <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${TASK_STATUS_COLOURS[task.status]}`}>
-                  {task.status.replace(/_/g, ' ')}
-                </span>
-              </div>
+            {tasks.map((task: { id: string; task_name: string; task_category: string; status: TaskStatus; assigned_to: string | null }) => (
+              <TaskRow
+                key={task.id}
+                task={task}
+                vehicleId={id}
+                fitters={fitters ?? []}
+              />
             ))}
           </div>
         )}
