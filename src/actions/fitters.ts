@@ -37,7 +37,7 @@ export async function createFitter(formData: FormData) {
   if (authError) throw new Error(`Failed to create account: ${authError.message}`)
 
   // Insert user profile (trigger may have already done this, use upsert to be safe)
-  await admin.from('users').upsert({
+  await (admin.from('users') as any).upsert({
     id:   newUser.user.id,
     name,
     email,
