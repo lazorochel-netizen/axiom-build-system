@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { completeTask, uncompleteTask } from '@/actions/tasks'
 import type { TaskStatus } from '@/types/database'
+import FitterTaskCard from '@/components/FitterTaskCard'
 
 export default async function FitterJobPage({
   params,
@@ -82,49 +83,18 @@ export default async function FitterJobPage({
             photo_required: boolean
             notes: string | null
           }) => {
-            const isComplete = task.status === 'completed'
-            const completeWithId = completeTask.bind(null, task.id, token)
+            const completeWithId   = completeTask.bind(null, task.id, token)
             const uncompleteWithId = uncompleteTask.bind(null, task.id, token)
 
             return (
-              <div
+              <FitterTaskCard
                 key={task.id}
-                className={`bg-white rounded-xl border px-4 py-3.5 flex items-start gap-3 transition-opacity ${
-                  isComplete ? 'border-green-200 opacity-70' : 'border-slate-200'
-                }`}
-              >
-                {/* Toggle button styled as checkbox */}
-                <form action={isComplete ? uncompleteWithId : completeWithId}>
-                  <button
-                    type="submit"
-                    className={`mt-0.5 w-6 h-6 rounded-full border-2 shrink-0 flex items-center justify-center transition-colors ${
-                      isComplete
-                        ? 'border-green-500 bg-green-500'
-                        : 'border-slate-300 hover:border-blue-400'
-                    }`}
-                    aria-label={isComplete ? 'Mark incomplete' : 'Mark complete'}
-                  >
-                    {isComplete && (
-                      <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
-                  </button>
-                </form>
-
-                <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium ${isComplete ? 'line-through text-slate-400' : 'text-slate-900'}`}>
-                    {task.task_name}
-                  </p>
-                  <p className="text-xs text-slate-400 mt-0.5">{task.task_category}</p>
-                  {task.photo_required && !isComplete && (
-                    <p className="text-xs text-amber-600 mt-1">📷 Photo required</p>
-                  )}
-                  {task.notes && (
-                    <p className="text-xs text-slate-500 mt-1 italic">{task.notes}</p>
-                  )}
-                </div>
-              </div>
+                task={task}
+                vehicleId={qr.vehicle_id}
+                token={token}
+                completeAction={completeWithId}
+                uncompleteAction={uncompleteWithId}
+              />
             )
           })}
         </div>
