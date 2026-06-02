@@ -8,10 +8,29 @@ const BUILD_TYPES = [
   { label: 'Axiom 20 — Nissan Elgrand',              value: 'Axiom 20' },
 ]
 
-export default function NewJobPage() {
+export default async function NewJobPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | undefined }>
+}) {
+  const params = await searchParams
+  const pre = {
+    customer:   params.customer   ?? '',
+    make:       params.make       ?? '',
+    model:      params.model      ?? '',
+    rego:       params.rego       ?? '',
+    build_type: params.build_type ?? '',
+  }
+
   return (
     <div className="max-w-2xl">
       <h1 className="text-xl font-semibold text-slate-900 mb-6">New Job</h1>
+
+      {pre.customer && (
+        <div className="mb-4 px-4 py-2.5 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+          Pre-filled from Build Log Sheet — review and confirm before creating.
+        </div>
+      )}
 
       <form action={createJob} className="space-y-8">
 
@@ -20,8 +39,8 @@ export default function NewJobPage() {
           <h2 className="text-sm font-semibold text-slate-700">Vehicle Details</h2>
 
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Make *" name="vehicle_make" placeholder="e.g. Jayco" required />
-            <Field label="Model *" name="vehicle_model" placeholder="e.g. Journey" required />
+            <Field label="Make *" name="vehicle_make" placeholder="e.g. Toyota" required defaultValue={pre.make} />
+            <Field label="Model *" name="vehicle_model" placeholder="e.g. Hiace" required defaultValue={pre.model} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -33,6 +52,7 @@ export default function NewJobPage() {
               <select
                 name="build_type"
                 required
+                defaultValue={pre.build_type}
                 className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Select build type…</option>
@@ -46,7 +66,7 @@ export default function NewJobPage() {
           <div className="grid grid-cols-3 gap-4">
             <Field label="VIN" name="vin" placeholder="Optional" />
             <Field label="Stock Number" name="stock_number" placeholder="Optional" />
-            <Field label="Registration" name="registration" placeholder="Optional" />
+            <Field label="Registration" name="registration" placeholder="Optional" defaultValue={pre.rego} />
           </div>
 
           <Field
@@ -60,7 +80,7 @@ export default function NewJobPage() {
         <section className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
           <h2 className="text-sm font-semibold text-slate-700">Customer Details</h2>
 
-          <Field label="Customer Name *" name="customer_name" placeholder="Full name" required />
+          <Field label="Customer Name *" name="customer_name" placeholder="Full name" required defaultValue={pre.customer} />
 
           <div className="grid grid-cols-2 gap-4">
             <Field label="Email" name="customer_email" type="email" placeholder="Optional" />
@@ -89,13 +109,14 @@ export default function NewJobPage() {
 }
 
 function Field({
-  label, name, placeholder, type = 'text', required = false,
+  label, name, placeholder, type = 'text', required = false, defaultValue = '',
 }: {
   label: string
   name: string
   placeholder?: string
   type?: string
   required?: boolean
+  defaultValue?: string
 }) {
   return (
     <div>
@@ -105,6 +126,7 @@ function Field({
         name={name}
         placeholder={placeholder}
         required={required}
+        defaultValue={defaultValue}
         className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
     </div>
