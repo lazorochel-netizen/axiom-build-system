@@ -31,7 +31,23 @@ export default function TaskRow({
   vehicleId: string
   fitters: Fitter[]
 }) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen]           = useState(false)
+  const [status, setStatus]       = useState(task.status)
+  const [assignedTo, setAssignedTo] = useState(task.assigned_to ?? '')
+  const [saving, setSaving]       = useState(false)
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setSaving(true)
+    const fd = new FormData()
+    fd.set('task_id',     task.id)
+    fd.set('vehicle_id',  vehicleId)
+    fd.set('status',      status)
+    fd.set('assigned_to', assignedTo)
+    await updateTask(fd)
+    setSaving(false)
+    setOpen(false)
+  }
 
   return (
     <div>
@@ -44,8 +60,8 @@ export default function TaskRow({
           <p className="text-xs text-slate-400">{task.task_category}</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_COLOURS[task.status] ?? STATUS_COLOURS.pending}`}>
-            {task.status.replace(/_/g, ' ')}
+          <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_COLOURS[status] ?? STATUS_COLOURS.pending}`}>
+            {status.replace(/_/g, ' ')}
           </span>
           <span className="text-slate-300 text-xs">{open ? '▲' : '▼'}</span>
         </div>
@@ -53,18 +69,15 @@ export default function TaskRow({
 
       {open && (
         <form
-          action={updateTask}
+          onSubmit={handleSubmit}
           className="px-4 pb-4 pt-2 bg-slate-50 border-t border-slate-100 space-y-3"
         >
-          <input type="hidden" name="task_id" value={task.id} />
-          <input type="hidden" name="vehicle_id" value={vehicleId} />
-
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-1">Status</label>
               <select
-                name="status"
-                defaultValue={task.status}
+                value={status}
+                onChange={e => setStatus(e.target.value)}
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="pending">Pending</option>
@@ -75,8 +88,8 @@ export default function TaskRow({
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-1">Assigned Fitter</label>
               <select
-                name="assigned_to"
-                defaultValue={task.assigned_to ?? ''}
+                value={assignedTo}
+                onChange={e => setAssignedTo(e.target.value)}
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Unassigned</option>
@@ -89,9 +102,10 @@ export default function TaskRow({
 
           <button
             type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+            disabled={saving}
+            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
           >
-            Save
+            {saving ? 'Saving…' : 'Save'}
           </button>
         </form>
       )}
