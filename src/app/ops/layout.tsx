@@ -46,7 +46,7 @@ export default async function OpsLayout({
           <NavLink href="/ops/quotations">Quotations</NavLink>
           <NavLink href="/ops/invoices">Invoices</NavLink>
           <div className="my-1 border-t border-slate-100" />
-          <NavLink href="/ops/fitters">Fitters</NavLink>
+          <NavLink href="/ops/fitters">Staff</NavLink>
         </nav>
 
         <main className="flex-1 p-4 md:p-6 overflow-auto">

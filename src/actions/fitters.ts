@@ -47,6 +47,46 @@ export async function createFitter(formData: FormData) {
   revalidatePath('/ops/fitters')
 }
 
+export async function createStaff(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const { data: profile } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if ((profile as any)?.role !== 'operations_manager') {
+    throw new Error('Unauthorised')
+  }
+
+  const name     = formData.get('name') as string
+  const email    = formData.get('email') as string
+  const password = formData.get('password') as string
+  const role     = formData.get('role') as string
+
+  const admin = createAdminClient()
+  const { data: newUser, error: authError } = await admin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: { name, role },
+  })
+
+  if (authError) throw new Error(`Failed to create account: ${authError.message}`)
+
+  await (admin.from('users') as any).upsert({
+    id: newUser.user.id,
+    name,
+    email,
+    role,
+  })
+
+  revalidatePath('/ops/fitters')
+}
+
 export async function deleteFitter(fitterId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
