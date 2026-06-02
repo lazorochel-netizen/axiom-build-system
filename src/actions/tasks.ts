@@ -1,33 +1,29 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 export async function completeTask(taskId: string, vehicleToken: string) {
-  const supabase = await createClient()
+  const admin = createAdminClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-
-  await supabase
-    .from('tasks')
-    .update({
-      status:       'completed',
-      completed_by: user?.id ?? null,
-      completed_at: new Date().toISOString(),
-    })
-    .eq('id', taskId)
+  await (admin.from('tasks') as any).update({
+    status:       'completed',
+    completed_at: new Date().toISOString(),
+  }).eq('id', taskId)
 
   revalidatePath(`/job/${vehicleToken}`)
 }
 
 export async function uncompleteTask(taskId: string, vehicleToken: string) {
-  const supabase = await createClient()
+  const admin = createAdminClient()
 
-  await supabase
-    .from('tasks')
-    .update({ status: 'pending', completed_by: null, completed_at: null })
-    .eq('id', taskId)
+  await (admin.from('tasks') as any).update({
+    status: 'pending',
+    completed_by: null,
+    completed_at: null,
+  }).eq('id', taskId)
 
   revalidatePath(`/job/${vehicleToken}`)
 }

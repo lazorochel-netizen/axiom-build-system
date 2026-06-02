@@ -23,6 +23,7 @@ export default function FitterTaskCard({ task, vehicleId, token, completeAction,
   const [showUpload, setShowUpload] = useState(false)
   const [preview, setPreview]       = useState<string | null>(null)
   const [uploading, setUploading]   = useState(false)
+  const [uploaded, setUploaded]     = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -41,6 +42,7 @@ export default function FitterTaskCard({ task, vehicleId, token, completeAction,
     setUploading(false)
     setShowUpload(false)
     setPreview(null)
+    setUploaded(true)
   }
 
   return (
@@ -75,7 +77,7 @@ export default function FitterTaskCard({ task, vehicleId, token, completeAction,
           {task.notes && (
             <p className="text-xs text-slate-500 mt-1 italic">{task.notes}</p>
           )}
-          {task.photo_required && !isComplete && (
+          {task.photo_required && !isComplete && !uploaded && (
             <button
               type="button"
               onClick={() => setShowUpload(v => !v)}
@@ -83,6 +85,9 @@ export default function FitterTaskCard({ task, vehicleId, token, completeAction,
             >
               📷 {showUpload ? 'Hide upload' : 'Upload photo (required)'}
             </button>
+          )}
+          {task.photo_required && !isComplete && uploaded && (
+            <p className="text-xs text-green-600 mt-1">✓ Photo uploaded successfully</p>
           )}
           {task.photo_required && isComplete && (
             <p className="text-xs text-green-600 mt-1">📷 Photo submitted</p>
