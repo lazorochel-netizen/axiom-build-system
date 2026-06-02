@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import PrintButton from './PrintButton'
 
 /**
  * Printable QR code page for a job.
@@ -69,13 +70,7 @@ export default async function PrintQRPage({
         </p>
       </div>
 
-      {/* Print button — hidden when printing */}
-      <button
-        onClick={() => window.print()}
-        className="mt-8 bg-slate-900 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors print:hidden"
-      >
-        Print QR Code
-      </button>
+      <PrintButton />
     </div>
   )
 }
