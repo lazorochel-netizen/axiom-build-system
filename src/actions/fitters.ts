@@ -17,7 +17,7 @@ export async function createFitter(formData: FormData) {
     .eq('id', user.id)
     .single()
 
-  if (profile?.role !== 'operations_manager') {
+  if ((profile as any)?.role !== 'operations_manager') {
     throw new Error('Unauthorised')
   }
 
