@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import type { TaskStatus } from '@/types/database'
+import JobNoteForm from '@/components/JobNoteForm'
 
 export default async function FitterDashboard() {
   const supabase = await createClient()
@@ -17,6 +18,23 @@ export default async function FitterDashboard() {
     .eq('assigned_to', user!.id)
     .neq('status', 'completed')
     .order('task_order', { ascending: true })
+
+  // Fetch job notes from activity_log
+  const vehicleIds = [...new Set((tasks ?? []).map((t: any) => t.vehicles?.id).filter(Boolean))]
+  const { data: notesRaw } = vehicleIds.length > 0
+    ? await supabase
+        .from('activity_log')
+        .select('vehicle_id, new_value, created_at')
+        .eq('action', 'note')
+        .in('vehicle_id', vehicleIds)
+        .order('created_at', { ascending: false })
+    : { data: [] }
+
+  const notesByVehicle = (notesRaw ?? []).reduce((acc: any, n: any) => {
+    if (!acc[n.vehicle_id]) acc[n.vehicle_id] = []
+    acc[n.vehicle_id].push({ text: n.new_value?.text ?? '', created_at: n.created_at })
+    return acc
+  }, {} as Record<string, { text: string; created_at: string }[]>)
 
   // Group tasks by vehicle
   const jobMap = new Map<string, {
@@ -89,6 +107,12 @@ export default async function FitterDashboard() {
                 </div>
               ))}
             </div>
+
+            {/* Notes */}
+            <JobNoteForm
+              vehicleId={vehicle.id}
+              existingNotes={notesByVehicle[vehicle.id] ?? []}
+            />
           </div>
         )
       })}
