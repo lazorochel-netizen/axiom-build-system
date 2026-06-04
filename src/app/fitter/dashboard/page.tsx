@@ -1,26 +1,56 @@
 import { createClient } from '@/lib/supabase/server'
-import type { TaskStatus } from '@/types/database'
 import JobNoteForm from '@/components/JobNoteForm'
 
 export default async function FitterDashboard() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Fetch all tasks assigned to this fitter, with their vehicle info
-  const { data: tasks } = await supabase
+  // Fetch jobs assigned to this fitter via job_fitters table
+  const { data: jobFitters } = await supabase
+    .from('job_fitters')
+    .select(`
+      vehicle_id,
+      vehicles (
+        id, job_id, vehicle_make, vehicle_model, vehicle_year,
+        build_type, build_status, notes,
+        tasks ( id, task_name, task_category, status, photo_required, task_order ),
+        qr_codes ( token, is_active )
+      )
+    `)
+    .eq('user_id', user!.id)
+
+  // Also fetch jobs where individual tasks are assigned to this fitter (backwards compat)
+  const { data: taskAssigned } = await supabase
     .from('tasks')
     .select(`
-      id, task_name, task_category, status, photo_required,
-      vehicles ( id, job_id, vehicle_make, vehicle_model, vehicle_year, build_type,
+      id, task_name, task_category, status, photo_required, task_order,
+      vehicles ( id, job_id, vehicle_make, vehicle_model, vehicle_year, build_type, build_status, notes,
+        tasks ( id, task_name, task_category, status, photo_required, task_order ),
         qr_codes ( token, is_active )
       )
     `)
     .eq('assigned_to', user!.id)
     .neq('status', 'completed')
-    .order('task_order', { ascending: true })
 
-  // Fetch job notes from activity_log
-  const vehicleIds = [...new Set((tasks ?? []).map((t: any) => t.vehicles?.id).filter(Boolean))]
+  // Merge both sources into a map by vehicle id
+  const jobMap = new Map<string, any>()
+
+  for (const jf of jobFitters ?? []) {
+    const v = jf.vehicles as any
+    if (!v) continue
+    if (!jobMap.has(v.id)) jobMap.set(v.id, v)
+  }
+
+  for (const task of taskAssigned ?? []) {
+    const v = task.vehicles as any
+    if (!v || jobMap.has(v.id)) continue
+    jobMap.set(v.id, v)
+  }
+
+  const vehicles = Array.from(jobMap.values())
+
+  // Fetch notes
+  const vehicleIds = vehicles.map(v => v.id)
   const { data: notesRaw } = vehicleIds.length > 0
     ? await supabase
         .from('activity_log')
@@ -36,40 +66,21 @@ export default async function FitterDashboard() {
     return acc
   }, {} as Record<string, { text: string; created_at: string }[]>)
 
-  // Group tasks by vehicle
-  const jobMap = new Map<string, {
-    vehicle: { id: string; job_id: string; vehicle_make: string; vehicle_model: string; vehicle_year: number | null; build_type: string; qr_codes: { token: string; is_active: boolean }[] }
-    tasks: { id: string; task_name: string; task_category: string; status: TaskStatus; photo_required: boolean }[]
-  }>()
-
-  for (const task of tasks ?? []) {
-    const v = task.vehicles as { id: string; job_id: string; vehicle_make: string; vehicle_model: string; vehicle_year: number | null; build_type: string; qr_codes: { token: string; is_active: boolean }[] }
-    if (!v) continue
-    if (!jobMap.has(v.id)) jobMap.set(v.id, { vehicle: v, tasks: [] })
-    jobMap.get(v.id)!.tasks.push({
-      id:             task.id,
-      task_name:      task.task_name,
-      task_category:  task.task_category,
-      status:         task.status as TaskStatus,
-      photo_required: task.photo_required,
-    })
-  }
-
-  const jobs = Array.from(jobMap.values())
-
   return (
     <div className="space-y-5">
       <h1 className="text-lg font-semibold text-slate-900">My Jobs</h1>
 
-      {jobs.length === 0 && (
+      {vehicles.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-slate-400 text-sm">No tasks assigned to you yet.</p>
-          <p className="text-slate-300 text-xs mt-1">Your supervisor will assign tasks shortly.</p>
+          <p className="text-slate-400 text-sm">No jobs assigned to you yet.</p>
+          <p className="text-slate-300 text-xs mt-1">Your supervisor will assign jobs shortly.</p>
         </div>
       )}
 
-      {jobs.map(({ vehicle, tasks: jobTasks }) => {
-        const activeQR = vehicle.qr_codes?.find(q => q.is_active)
+      {vehicles.map((vehicle: any) => {
+        const activeQR = vehicle.qr_codes?.find((q: any) => q.is_active)
+        const tasks = (vehicle.tasks ?? []).sort((a: any, b: any) => a.task_order - b.task_order)
+
         return (
           <div key={vehicle.id} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
             {/* Job header */}
@@ -92,18 +103,28 @@ export default async function FitterDashboard() {
 
             {/* Task list */}
             <div className="divide-y divide-slate-50">
-              {jobTasks.map(task => (
+              {tasks.map((task: any) => (
                 <div key={task.id} className="px-4 py-3 flex items-center gap-3">
                   <div className={`w-2 h-2 rounded-full shrink-0 ${
-                    task.status === 'in_progress' ? 'bg-blue-400' : 'bg-slate-200'
+                    task.status === 'completed'    ? 'bg-green-400' :
+                    task.status === 'in_progress'  ? 'bg-blue-400'  :
+                    task.status === 'waiting_for_kit' ? 'bg-amber-400' :
+                    'bg-slate-200'
                   }`} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-slate-800 truncate">{task.task_name}</p>
+                    <p className={`text-sm truncate ${task.status === 'completed' ? 'line-through text-slate-400' : 'text-slate-800'}`}>
+                      {task.task_name}
+                    </p>
                     <p className="text-xs text-slate-400">{task.task_category}</p>
                   </div>
-                  {task.photo_required && (
-                    <span className="text-xs text-amber-600 shrink-0">📷</span>
-                  )}
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                    task.status === 'completed'       ? 'bg-green-100 text-green-700' :
+                    task.status === 'in_progress'     ? 'bg-blue-100 text-blue-700'   :
+                    task.status === 'waiting_for_kit' ? 'bg-amber-100 text-amber-700' :
+                    'bg-slate-100 text-slate-500'
+                  }`}>
+                    {task.status.replace(/_/g, ' ')}
+                  </span>
                 </div>
               ))}
             </div>

@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { addTask } from '@/actions/tasks'
 import { saveJobNotes } from '@/actions/jobs'
 import { togglePhotoVisibility } from '@/actions/photos'
+import { assignFitterToJob, removeFitterFromJob } from '@/actions/job-fitters'
 import BuildStatusSelect from '@/components/BuildStatusSelect'
 import type { TaskStatus } from '@/types/database'
 import TaskRow from '@/components/TaskRow'
@@ -51,6 +52,12 @@ export default async function JobDetailPage({
     .from('users')
     .select('id, name')
     .eq('role', 'fitter')
+
+  // Fetch assigned fitters for this job
+  const { data: jobFitters } = await supabase
+    .from('job_fitters')
+    .select('user_id, users(id, name)')
+    .eq('vehicle_id', id)
 
   const tasks = (vehicle.tasks ?? []).sort(
     (a: { task_order: number }, b: { task_order: number }) => a.task_order - b.task_order
@@ -106,6 +113,39 @@ export default async function JobDetailPage({
           </div>
         ))}
       </div>
+
+      {/* Assigned Fitters */}
+      <section className="bg-white rounded-xl border border-slate-200 p-4">
+        <h2 className="text-sm font-semibold text-slate-700 mb-3">Assigned Fitters</h2>
+        <div className="flex flex-wrap gap-2 mb-3">
+          {jobFitters && jobFitters.length > 0 ? jobFitters.map((jf: any) => (
+            <div key={jf.user_id} className="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-full px-3 py-1.5">
+              <span className="text-sm text-blue-800 font-medium">{jf.users?.name}</span>
+              <form action={removeFitterFromJob}>
+                <input type="hidden" name="vehicle_id" value={id} />
+                <input type="hidden" name="user_id" value={jf.user_id} />
+                <button type="submit" className="text-blue-400 hover:text-red-500 text-xs font-bold transition-colors">✕</button>
+              </form>
+            </div>
+          )) : (
+            <p className="text-sm text-slate-400">No fitters assigned yet.</p>
+          )}
+        </div>
+        {fitters && fitters.filter(f => !jobFitters?.find((jf: any) => jf.user_id === f.id)).length > 0 && (
+          <form action={assignFitterToJob} className="flex items-center gap-2">
+            <input type="hidden" name="vehicle_id" value={id} />
+            <select name="user_id" className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="">Select fitter to add…</option>
+              {fitters.filter(f => !jobFitters?.find((jf: any) => jf.user_id === f.id)).map(f => (
+                <option key={f.id} value={f.id}>{f.name}</option>
+              ))}
+            </select>
+            <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+              Assign
+            </button>
+          </form>
+        )}
+      </section>
 
       {/* Progress */}
       <div className="bg-white rounded-xl border border-slate-200 p-4">
