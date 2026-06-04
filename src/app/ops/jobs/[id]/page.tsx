@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { addTask } from '@/actions/tasks'
 import type { TaskStatus } from '@/types/database'
 import TaskRow from '@/components/TaskRow'
+import DeleteJobButton from '@/components/DeleteJobButton'
 
 const TASK_STATUS_COLOURS: Record<TaskStatus, string> = {
   pending:     'bg-slate-100 text-slate-600',
@@ -69,7 +70,7 @@ export default async function JobDetailPage({
           </h1>
           <p className="text-sm text-slate-400 mt-0.5">{vehicle.job_id} · {vehicle.build_type}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
           {activeQR && (
             <a
               href={`/ops/jobs/${id}/print-qr`}
@@ -82,6 +83,7 @@ export default async function JobDetailPage({
           <span className="text-xs font-medium px-2.5 py-1.5 rounded-full bg-blue-100 text-blue-700">
             {vehicle.build_status.replace(/_/g, ' ')}
           </span>
+          <DeleteJobButton vehicleId={id} />
         </div>
       </div>
 

@@ -77,3 +77,19 @@ export async function createJob(formData: FormData) {
 
   redirect(`/ops/jobs/${vehicle.id}`)
 }
+
+export async function deleteJob(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const vehicleId = formData.get('vehicle_id') as string
+
+  // Delete in order: tasks, qr_codes, photos, vehicle (customer kept)
+  await supabase.from('tasks').delete().eq('vehicle_id', vehicleId)
+  await supabase.from('qr_codes').delete().eq('vehicle_id', vehicleId)
+  await supabase.from('photos').delete().eq('vehicle_id', vehicleId)
+  await supabase.from('vehicles').delete().eq('id', vehicleId)
+
+  redirect('/ops/jobs')
+}
