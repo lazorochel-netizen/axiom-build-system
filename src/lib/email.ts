@@ -14,17 +14,18 @@
 
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-const FROM   = process.env.EMAIL_FROM  ?? 'Axiom Builds <builds@axiomgroup.com.au>'
-const OPS    = process.env.EMAIL_OPS   ?? ''
+const FROM = process.env.EMAIL_FROM ?? 'Axiom Builds <builds@axiomgroup.com.au>'
+const OPS  = process.env.EMAIL_OPS  ?? ''
 
-// ─── Helper ──────────────────────────────────────────────────────────────────
+// ─── Helper — lazy client so module load never throws at build time ───────────
 async function send(to: string | string[], subject: string, html: string) {
-  if (!process.env.RESEND_API_KEY) {
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) {
     console.warn('[email] RESEND_API_KEY not set — skipping email:', subject)
     return
   }
   try {
+    const resend = new Resend(apiKey)
     await resend.emails.send({ from: FROM, to, subject, html })
   } catch (err) {
     console.error('[email] Failed to send:', subject, err)
