@@ -17,9 +17,10 @@ type Fitter = {
 }
 
 const STATUS_COLOURS: Record<string, string> = {
-  pending:     'bg-slate-100 text-slate-600',
-  in_progress: 'bg-blue-100 text-blue-700',
-  completed:   'bg-green-100 text-green-700',
+  pending:          'bg-slate-100 text-slate-600',
+  in_progress:      'bg-blue-100 text-blue-700',
+  waiting_for_kit:  'bg-amber-100 text-amber-700',
+  completed:        'bg-green-100 text-green-700',
 }
 
 export default function TaskRow({
@@ -82,6 +83,7 @@ export default function TaskRow({
               >
                 <option value="pending">Pending</option>
                 <option value="in_progress">In Progress</option>
+                <option value="waiting_for_kit">Waiting for the Kit</option>
                 <option value="completed">Completed</option>
               </select>
             </div>

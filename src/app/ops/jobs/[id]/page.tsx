@@ -5,10 +5,11 @@ import type { TaskStatus } from '@/types/database'
 import TaskRow from '@/components/TaskRow'
 import DeleteJobButton from '@/components/DeleteJobButton'
 
-const TASK_STATUS_COLOURS: Record<TaskStatus, string> = {
-  pending:     'bg-slate-100 text-slate-600',
-  in_progress: 'bg-blue-100 text-blue-700',
-  completed:   'bg-green-100 text-green-700',
+const TASK_STATUS_COLOURS: Record<string, string> = {
+  pending:         'bg-slate-100 text-slate-600',
+  in_progress:     'bg-blue-100 text-blue-700',
+  waiting_for_kit: 'bg-amber-100 text-amber-700',
+  completed:       'bg-green-100 text-green-700',
 }
 
 const TASK_CATEGORIES = [
