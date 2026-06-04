@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { addTask } from '@/actions/tasks'
 import { saveJobNotes } from '@/actions/jobs'
+import { togglePhotoVisibility } from '@/actions/photos'
+import BuildStatusSelect from '@/components/BuildStatusSelect'
 import type { TaskStatus } from '@/types/database'
 import TaskRow from '@/components/TaskRow'
 import DeleteJobButton from '@/components/DeleteJobButton'
@@ -82,9 +84,7 @@ export default async function JobDetailPage({
               Print QR
             </a>
           )}
-          <span className="text-xs font-medium px-2.5 py-1.5 rounded-full bg-blue-100 text-blue-700">
-            {vehicle.build_status.replace(/_/g, ' ')}
-          </span>
+          <BuildStatusSelect vehicleId={id} currentStatus={vehicle.build_status} />
           <DeleteJobButton vehicleId={id} />
         </div>
       </div>
@@ -230,6 +230,34 @@ export default async function JobDetailPage({
           </form>
         </div>
       </section>
+
+      {/* Photos */}
+      {vehicle.photos && vehicle.photos.length > 0 && (
+        <section>
+          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">Fitter Photos</h2>
+          <div className="grid grid-cols-2 gap-3">
+            {(vehicle.photos as { id: string; image_url: string; is_customer_visible: boolean; uploaded_at: string }[]).map(photo => (
+              <div key={photo.id} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={photo.image_url} alt="Build photo" className="w-full aspect-video object-cover" />
+                <div className="px-3 py-2 flex items-center justify-between">
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${photo.is_customer_visible ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                    {photo.is_customer_visible ? 'Visible to customer' : 'Hidden'}
+                  </span>
+                  <form action={togglePhotoVisibility}>
+                    <input type="hidden" name="photo_id" value={photo.id} />
+                    <input type="hidden" name="vehicle_id" value={id} />
+                    <input type="hidden" name="visible" value={String(photo.is_customer_visible)} />
+                    <button type="submit" className="text-xs text-blue-600 hover:underline">
+                      {photo.is_customer_visible ? 'Hide' : 'Show to customer'}
+                    </button>
+                  </form>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* QR Code */}
       {activeQR && (

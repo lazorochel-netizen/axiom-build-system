@@ -73,6 +73,18 @@ export async function createJob(formData: FormData) {
   redirect(`/ops/jobs/${vehicle.id}`)
 }
 
+export async function updateBuildStatus(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const vehicleId   = formData.get('vehicle_id') as string
+  const buildStatus = formData.get('build_status') as string
+
+  await supabase.from('vehicles').update({ build_status: buildStatus }).eq('id', vehicleId)
+  revalidatePath(`/ops/jobs/${vehicleId}`)
+}
+
 export async function saveJobNotes(formData: FormData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

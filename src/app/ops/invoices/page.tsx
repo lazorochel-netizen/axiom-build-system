@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { InvoiceStatus } from '@/types/database'
-import { createInvoice, convertQuotationToInvoice, createInvoiceFromBuildLog } from '@/actions/invoices'
+import { createInvoice, convertQuotationToInvoice, createInvoiceFromBuildLog, updateInvoiceStatus } from '@/actions/invoices'
 
 const STATUS_COLOURS: Record<InvoiceStatus, string> = {
   draft:   'bg-slate-100 text-slate-600',
@@ -156,9 +156,21 @@ export default async function InvoicesPage() {
                   {inv.due_date && <p className="text-xs text-slate-400 mt-1">Due {new Date(inv.due_date).toLocaleDateString('en-AU')}</p>}
                   {inv.notes && <p className="text-xs text-slate-400 mt-1 truncate">{inv.notes}</p>}
                 </div>
-                <div className="text-right shrink-0">
+                <div className="text-right shrink-0 space-y-1">
                   <p className="text-sm font-semibold text-slate-900">${inv.total_amount.toLocaleString()}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">{new Date(inv.created_at).toLocaleDateString('en-AU')}</p>
+                  <p className="text-xs text-slate-400">{new Date(inv.created_at).toLocaleDateString('en-AU')}</p>
+                  <form action={updateInvoiceStatus} className="flex gap-1 justify-end flex-wrap">
+                    <input type="hidden" name="invoice_id" value={inv.id} />
+                    {inv.status !== 'sent' && (
+                      <button name="status" value="sent" className="text-xs px-2 py-1 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors">Mark Sent</button>
+                    )}
+                    {inv.status !== 'paid' && (
+                      <button name="status" value="paid" className="text-xs px-2 py-1 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors">Mark Paid</button>
+                    )}
+                    {inv.status !== 'draft' && (
+                      <button name="status" value="draft" className="text-xs px-2 py-1 rounded-lg bg-slate-50 text-slate-500 hover:bg-slate-100 transition-colors">Revert</button>
+                    )}
+                  </form>
                 </div>
               </div>
             ))}

@@ -5,9 +5,18 @@ const STATUS_COLOURS: Record<BuildStatus, string> = {
   pending:                'bg-slate-100 text-slate-600',
   in_progress:            'bg-blue-100 text-blue-700',
   waiting_on_parts:       'bg-amber-100 text-amber-700',
-  waiting_on_compliance:  'bg-purple-100 text-purple-700',
+  waiting_on_compliance:  'bg-amber-100 text-amber-700',
   completed:              'bg-green-100 text-green-700',
   delivered:              'bg-slate-200 text-slate-500',
+}
+
+const STATUS_LABELS: Record<BuildStatus, string> = {
+  pending:                'Pending',
+  in_progress:            'In Progress',
+  waiting_on_parts:       'Waiting for the Kit',
+  waiting_on_compliance:  'Waiting for the Kit',
+  completed:              'Completed',
+  delivered:              'Delivered',
 }
 
 export default async function JobsPage({
@@ -46,13 +55,12 @@ export default async function JobsPage({
   }) ?? []
 
   const statuses: { value: string; label: string }[] = [
-    { value: 'all',                   label: 'All' },
-    { value: 'pending',               label: 'Pending' },
-    { value: 'in_progress',           label: 'In Progress' },
-    { value: 'waiting_on_parts',      label: 'Waiting on Parts' },
-    { value: 'waiting_on_compliance', label: 'Waiting on Compliance' },
-    { value: 'completed',             label: 'Completed' },
-    { value: 'delivered',             label: 'Delivered' },
+    { value: 'all',              label: 'All' },
+    { value: 'pending',          label: 'Pending' },
+    { value: 'in_progress',      label: 'In Progress' },
+    { value: 'waiting_on_parts', label: 'Waiting for the Kit' },
+    { value: 'completed',        label: 'Completed' },
+    { value: 'delivered',        label: 'Delivered' },
   ]
 
   return (
@@ -126,7 +134,7 @@ export default async function JobsPage({
                   )}
                 </div>
                 <span className={`ml-4 shrink-0 text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_COLOURS[v.build_status as BuildStatus]}`}>
-                  {v.build_status.replace(/_/g, ' ')}
+                  {STATUS_LABELS[v.build_status as BuildStatus]}
                 </span>
               </a>
             )

@@ -1,7 +1,9 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 
 export async function uploadTaskPhoto(formData: FormData) {
   const file      = formData.get('photo') as File
@@ -35,4 +37,17 @@ export async function uploadTaskPhoto(formData: FormData) {
   })
 
   revalidatePath(`/job/${token}`)
+}
+
+export async function togglePhotoVisibility(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const photoId   = formData.get('photo_id') as string
+  const vehicleId = formData.get('vehicle_id') as string
+  const visible   = formData.get('visible') === 'true'
+
+  await supabase.from('photos').update({ is_customer_visible: !visible }).eq('id', photoId)
+  revalidatePath(`/ops/jobs/${vehicleId}`)
 }

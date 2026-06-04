@@ -60,6 +60,30 @@ export async function convertQuotationToInvoice(formData: FormData) {
   revalidatePath('/ops/quotations')
 }
 
+export async function updateInvoiceStatus(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const invoiceId = formData.get('invoice_id') as string
+  const status    = formData.get('status') as string
+
+  await supabase.from('invoices').update({ status }).eq('id', invoiceId)
+  revalidatePath('/ops/invoices')
+}
+
+export async function updateQuotationStatus(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const quotationId = formData.get('quotation_id') as string
+  const status      = formData.get('status') as string
+
+  await supabase.from('quotations').update({ status }).eq('id', quotationId)
+  revalidatePath('/ops/quotations')
+}
+
 export async function createInvoiceFromBuildLog(formData: FormData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

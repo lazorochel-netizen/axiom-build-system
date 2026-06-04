@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import type { QuotationStatus } from '@/types/database'
+import { updateQuotationStatus } from '@/actions/invoices'
 
 const STATUS_COLOURS: Record<QuotationStatus, string> = {
   draft:    'bg-slate-100 text-slate-600',
@@ -94,9 +95,21 @@ export default async function QuotationsPage() {
                   )}
                   {q.notes && <p className="text-xs text-slate-400 mt-1 truncate">{q.notes}</p>}
                 </div>
-                <div className="text-right shrink-0">
+                <div className="text-right shrink-0 space-y-1">
                   <p className="text-sm font-semibold text-slate-900">${q.total_amount.toLocaleString()}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">{new Date(q.created_at).toLocaleDateString('en-AU')}</p>
+                  <p className="text-xs text-slate-400">{new Date(q.created_at).toLocaleDateString('en-AU')}</p>
+                  <form action={updateQuotationStatus} className="flex gap-1 justify-end flex-wrap">
+                    <input type="hidden" name="quotation_id" value={q.id} />
+                    {q.status !== 'sent' && (
+                      <button name="status" value="sent" className="text-xs px-2 py-1 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors">Mark Sent</button>
+                    )}
+                    {q.status !== 'accepted' && (
+                      <button name="status" value="accepted" className="text-xs px-2 py-1 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors">Accept</button>
+                    )}
+                    {q.status !== 'declined' && (
+                      <button name="status" value="declined" className="text-xs px-2 py-1 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors">Decline</button>
+                    )}
+                  </form>
                 </div>
               </div>
             ))}
