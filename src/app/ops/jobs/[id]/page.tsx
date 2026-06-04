@@ -36,37 +36,36 @@ export default async function JobDetailPage({
   const { error } = await searchParams
   const supabase = await createClient()
 
-  const { data: vehicle } = await supabase
-    .from('vehicles')
-    .select(`
-      *,
-      customers ( name, email, phone ),
-      tasks ( * ),
-      qr_codes ( token, is_active ),
-      photos ( id, image_url, is_customer_visible, uploaded_at )
-    `)
-    .eq('id', id)
-    .single()
+  // Fetch vehicle + fitters list + job fitters in parallel
+  const [{ data: vehicle }, { data: fitters }, { data: jobFitters }] = await Promise.all([
+    supabase
+      .from('vehicles')
+      .select(`
+        *,
+        customers ( name, email, phone ),
+        tasks ( * ),
+        qr_codes ( token, is_active ),
+        photos ( id, image_url, is_customer_visible, uploaded_at )
+      `)
+      .eq('id', id)
+      .single(),
+    supabase
+      .from('users')
+      .select('id, name')
+      .eq('role', 'fitter'),
+    supabase
+      .from('job_fitters')
+      .select('user_id, users(id, name)')
+      .eq('vehicle_id', id),
+  ])
 
   if (!vehicle) notFound()
-
-  // Fetch fitters for task assignment
-  const { data: fitters } = await supabase
-    .from('users')
-    .select('id, name')
-    .eq('role', 'fitter')
-
-  // Fetch assigned fitters for this job
-  const { data: jobFitters } = await supabase
-    .from('job_fitters')
-    .select('user_id, users(id, name)')
-    .eq('vehicle_id', id)
 
   const tasks = (vehicle.tasks ?? []).sort(
     (a: { task_order: number }, b: { task_order: number }) => a.task_order - b.task_order
   )
 
-  // Fetch task fitters
+  // Fetch task fitters (depends on tasks being resolved first)
   const taskIds = tasks.map((t: any) => t.id)
   const { data: taskFitters } = taskIds.length > 0
     ? await supabase

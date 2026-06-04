@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import type { BuildStatus } from '@/types/database'
 
+const DONE_PAGE_SIZE = 10
+
 const STATUS_LABELS: Record<BuildStatus, string> = {
   pending:                'Pending',
   in_progress:            'In Progress',
@@ -24,17 +26,34 @@ const STATUS_COLOURS: Record<BuildStatus, string> = {
   delivered:              'bg-slate-200 text-slate-500',
 }
 
-export default async function OpsDashboard() {
+export default async function OpsDashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>
+}) {
+  const { page } = await searchParams
+  const donePage = Math.max(0, parseInt(page ?? '0', 10))
   const supabase = await createClient()
 
-  const { data: vehicles } = await supabase
-    .from('vehicles')
-    .select('id, job_id, vehicle_make, vehicle_model, vehicle_year, build_status, build_type, estimated_completion_date')
-    .order('created_at', { ascending: false })
-    .limit(50)
+  // Active jobs — no limit, all statuses except completed/delivered
+  const [{ data: active }, { data: done, count: doneCount }] = await Promise.all([
+    supabase
+      .from('vehicles')
+      .select('id, job_id, vehicle_make, vehicle_model, vehicle_year, build_status, build_type, estimated_completion_date')
+      .not('build_status', 'in', '("completed","delivered")')
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('vehicles')
+      .select('id, job_id, vehicle_make, vehicle_model, vehicle_year, build_status', { count: 'exact' })
+      .in('build_status', ['completed', 'delivered'])
+      .order('created_at', { ascending: false })
+      .range(donePage * DONE_PAGE_SIZE, (donePage + 1) * DONE_PAGE_SIZE - 1),
+  ])
 
-  const active = vehicles?.filter(v => !['completed', 'delivered'].includes(v.build_status)) ?? []
-  const done   = vehicles?.filter(v =>  ['completed', 'delivered'].includes(v.build_status)) ?? []
+  // Counts per status for summary tiles (separate lightweight query)
+  const { data: allStatuses } = await supabase
+    .from('vehicles')
+    .select('build_status')
 
   return (
     <div className="space-y-6 max-w-5xl">
@@ -51,7 +70,7 @@ export default async function OpsDashboard() {
       {/* Summary pills */}
       <div className="grid grid-cols-2 sm:grid-cols-6 gap-3">
         {DASHBOARD_STATUSES.map(status => {
-          const count = vehicles?.filter(v => v.build_status === status).length ?? 0
+          const count = allStatuses?.filter(v => v.build_status === status).length ?? 0
           return (
             <div key={status} className="bg-white rounded-xl border border-slate-200 p-4">
               <p className="text-2xl font-bold text-slate-900">{count}</p>
@@ -63,8 +82,10 @@ export default async function OpsDashboard() {
 
       {/* Active jobs */}
       <section>
-        <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">Active Jobs</h2>
-        {active.length === 0 ? (
+        <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">
+          Active Jobs {active && active.length > 0 && <span className="text-slate-400 font-normal">({active.length})</span>}
+        </h2>
+        {!active?.length ? (
           <p className="text-sm text-slate-400">No active jobs.</p>
         ) : (
           <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
@@ -94,12 +115,17 @@ export default async function OpsDashboard() {
         )}
       </section>
 
-      {/* Completed jobs */}
-      {done.length > 0 && (
+      {/* Completed & Delivered jobs — paginated */}
+      {(done?.length ?? 0) > 0 && (
         <section>
-          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">Completed & Delivered</h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide">
+              Completed & Delivered
+            </h2>
+            <span className="text-xs text-slate-400">{doneCount ?? 0} total</span>
+          </div>
           <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
-            {done.map(v => (
+            {done!.map(v => (
               <a
                 key={v.id}
                 href={`/ops/jobs/${v.id}`}
@@ -117,6 +143,17 @@ export default async function OpsDashboard() {
               </a>
             ))}
           </div>
+          {/* Pagination */}
+          {(doneCount ?? 0) > DONE_PAGE_SIZE && (
+            <div className="flex justify-between mt-3">
+              {donePage > 0 ? (
+                <a href={`?page=${donePage - 1}`} className="text-xs text-blue-600 hover:underline">← Newer</a>
+              ) : <span />}
+              {(donePage + 1) * DONE_PAGE_SIZE < (doneCount ?? 0) && (
+                <a href={`?page=${donePage + 1}`} className="text-xs text-blue-600 hover:underline">Older →</a>
+              )}
+            </div>
+          )}
         </section>
       )}
     </div>

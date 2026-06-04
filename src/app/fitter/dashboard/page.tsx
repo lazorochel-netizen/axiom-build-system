@@ -5,7 +5,7 @@ export default async function FitterDashboard() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Fetch jobs assigned to this fitter via job_fitters table
+  // Single query — fetch all jobs assigned to this fitter via job_fitters
   const { data: jobFitters } = await supabase
     .from('job_fitters')
     .select(`
@@ -19,52 +19,11 @@ export default async function FitterDashboard() {
     `)
     .eq('user_id', user!.id)
 
-  // Also fetch jobs where individual tasks are assigned to this fitter (backwards compat)
-  const { data: taskAssigned } = await supabase
-    .from('tasks')
-    .select(`
-      id, task_name, task_category, status, photo_required, task_order,
-      vehicles ( id, job_id, vehicle_make, vehicle_model, vehicle_year, build_type, build_status, notes,
-        tasks ( id, task_name, task_category, status, photo_required, task_order ),
-        qr_codes ( token, is_active )
-      )
-    `)
-    .eq('assigned_to', user!.id)
-    .neq('status', 'completed')
+  const vehicles = (jobFitters ?? [])
+    .map(jf => jf.vehicles as any)
+    .filter(Boolean)
 
-  // Merge both sources into a map by vehicle id
-  const jobMap = new Map<string, any>()
-
-  for (const jf of jobFitters ?? []) {
-    const v = jf.vehicles as any
-    if (!v) continue
-    if (!jobMap.has(v.id)) jobMap.set(v.id, v)
-  }
-
-  for (const task of taskAssigned ?? []) {
-    const v = task.vehicles as any
-    if (!v || jobMap.has(v.id)) continue
-    jobMap.set(v.id, v)
-  }
-
-  const vehicles = Array.from(jobMap.values())
-
-  // Fetch notes
-  const vehicleIds = vehicles.map(v => v.id)
-  const { data: notesRaw } = vehicleIds.length > 0
-    ? await supabase
-        .from('activity_log')
-        .select('vehicle_id, new_value, created_at')
-        .eq('action', 'note')
-        .in('vehicle_id', vehicleIds)
-        .order('created_at', { ascending: false })
-    : { data: [] }
-
-  const notesByVehicle = (notesRaw ?? []).reduce((acc: any, n: any) => {
-    if (!acc[n.vehicle_id]) acc[n.vehicle_id] = []
-    acc[n.vehicle_id].push({ text: n.new_value?.text ?? '', created_at: n.created_at })
-    return acc
-  }, {} as Record<string, { text: string; created_at: string }[]>)
+  const notesByVehicle: Record<string, { text: string; created_at: string }[]> = {}
 
   return (
     <div className="space-y-5">
