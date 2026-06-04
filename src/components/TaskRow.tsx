@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { updateTask, deleteTask, editTaskName } from '@/actions/tasks'
+import { assignFitterToTask, removeFitterFromTask } from '@/actions/task-fitters'
 
 type Task = {
   id: string
@@ -36,36 +37,38 @@ export default function TaskRow({
   task,
   vehicleId,
   fitters,
+  assignedFitters = [],
 }: {
   task: Task
   vehicleId: string
   fitters: Fitter[]
+  assignedFitters?: Fitter[]
 }) {
   const [open, setOpen]             = useState(false)
   const [status, setStatus]         = useState(task.status)
-  const [assignedTo, setAssignedTo] = useState(task.assigned_to ?? '')
   const [taskName, setTaskName]     = useState(task.task_name)
   const [category, setCategory]     = useState(task.task_category)
   const [saving, setSaving]         = useState(false)
   const [deleting, setDeleting]     = useState(false)
+  const [localAssigned, setLocalAssigned] = useState<Fitter[]>(assignedFitters)
+
+  const unassignedFitters = fitters.filter(f => !localAssigned.find(a => a.id === f.id))
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setSaving(true)
-    // Save name/category
     const fdName = new FormData()
-    fdName.set('task_id',       task.id)
-    fdName.set('vehicle_id',    vehicleId)
-    fdName.set('task_name',     taskName)
+    fdName.set('task_id', task.id)
+    fdName.set('vehicle_id', vehicleId)
+    fdName.set('task_name', taskName)
     fdName.set('task_category', category)
     await editTaskName(fdName)
 
-    // Save status/fitter
     const fd = new FormData()
-    fd.set('task_id',     task.id)
-    fd.set('vehicle_id',  vehicleId)
-    fd.set('status',      status)
-    fd.set('assigned_to', assignedTo)
+    fd.set('task_id', task.id)
+    fd.set('vehicle_id', vehicleId)
+    fd.set('status', status)
+    fd.set('assigned_to', localAssigned[0]?.id ?? '')
     await updateTask(fd)
 
     setSaving(false)
@@ -76,9 +79,32 @@ export default function TaskRow({
     if (!confirm(`Delete "${taskName}"? This cannot be undone.`)) return
     setDeleting(true)
     const fd = new FormData()
-    fd.set('task_id',    task.id)
+    fd.set('task_id', task.id)
     fd.set('vehicle_id', vehicleId)
     await deleteTask(fd)
+  }
+
+  async function handleAssignFitter(e: React.ChangeEvent<HTMLSelectElement>) {
+    const fitterId = e.target.value
+    if (!fitterId) return
+    const fitter = fitters.find(f => f.id === fitterId)
+    if (!fitter) return
+    setLocalAssigned(prev => [...prev, fitter])
+    e.target.value = ''
+    const fd = new FormData()
+    fd.set('task_id', task.id)
+    fd.set('user_id', fitterId)
+    fd.set('vehicle_id', vehicleId)
+    await assignFitterToTask(fd)
+  }
+
+  async function handleRemoveFitter(fitterId: string) {
+    setLocalAssigned(prev => prev.filter(f => f.id !== fitterId))
+    const fd = new FormData()
+    fd.set('task_id', task.id)
+    fd.set('user_id', fitterId)
+    fd.set('vehicle_id', vehicleId)
+    await removeFitterFromTask(fd)
   }
 
   return (
@@ -87,11 +113,21 @@ export default function TaskRow({
         className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-slate-50 transition-colors"
         onClick={() => setOpen(o => !o)}
       >
-        <div>
+        <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-slate-900">{taskName}</p>
-          <p className="text-xs text-slate-400">{category}</p>
+          <div className="flex items-center gap-1 flex-wrap mt-0.5">
+            <p className="text-xs text-slate-400">{category}</p>
+            {localAssigned.length > 0 && (
+              <>
+                <span className="text-slate-300 text-xs">·</span>
+                {localAssigned.map(f => (
+                  <span key={f.id} className="text-xs bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded-full">{f.name}</span>
+                ))}
+              </>
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ml-2">
           <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_COLOURS[status] ?? STATUS_COLOURS.pending}`}>
             {status.replace(/_/g, ' ')}
           </span>
@@ -126,34 +162,50 @@ export default function TaskRow({
             </div>
           </div>
 
-          {/* Status & fitter */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">Status</label>
+          {/* Status */}
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Status</label>
+            <select
+              value={status}
+              onChange={e => setStatus(e.target.value)}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="pending">Pending</option>
+              <option value="in_progress">In Progress</option>
+              <option value="waiting_for_kit">Waiting for the Kit</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+
+          {/* Multi-fitter assignment */}
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Assigned Fitters</label>
+            {localAssigned.length > 0 && (
+              <div className="flex flex-wrap gap-1 mb-2">
+                {localAssigned.map(f => (
+                  <span key={f.id} className="inline-flex items-center gap-1 bg-blue-50 border border-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                    {f.name}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveFitter(f.id)}
+                      className="text-blue-400 hover:text-red-500 font-bold"
+                    >✕</button>
+                  </span>
+                ))}
+              </div>
+            )}
+            {unassignedFitters.length > 0 && (
               <select
-                value={status}
-                onChange={e => setStatus(e.target.value)}
+                onChange={handleAssignFitter}
+                defaultValue=""
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="pending">Pending</option>
-                <option value="in_progress">In Progress</option>
-                <option value="waiting_for_kit">Waiting for the Kit</option>
-                <option value="completed">Completed</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">Assigned Fitter</label>
-              <select
-                value={assignedTo}
-                onChange={e => setAssignedTo(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Unassigned</option>
-                {fitters.map(f => (
+                <option value="">+ Add fitter…</option>
+                {unassignedFitters.map(f => (
                   <option key={f.id} value={f.id}>{f.name}</option>
                 ))}
               </select>
-            </div>
+            )}
           </div>
 
           <div className="flex items-center gap-3">

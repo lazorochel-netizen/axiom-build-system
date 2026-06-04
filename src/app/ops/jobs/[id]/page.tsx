@@ -59,6 +59,21 @@ export default async function JobDetailPage({
     .select('user_id, users(id, name)')
     .eq('vehicle_id', id)
 
+  // Fetch task fitters
+  const taskIds = tasks.map((t: any) => t.id)
+  const { data: taskFitters } = taskIds.length > 0
+    ? await supabase
+        .from('task_fitters')
+        .select('task_id, user_id, users(id, name)')
+        .in('task_id', taskIds)
+    : { data: [] }
+
+  const taskFittersMap = (taskFitters ?? []).reduce((acc: any, tf: any) => {
+    if (!acc[tf.task_id]) acc[tf.task_id] = []
+    acc[tf.task_id].push({ id: tf.user_id, name: tf.users?.name })
+    return acc
+  }, {} as Record<string, { id: string; name: string }[]>)
+
   const tasks = (vehicle.tasks ?? []).sort(
     (a: { task_order: number }, b: { task_order: number }) => a.task_order - b.task_order
   )
@@ -174,6 +189,7 @@ export default async function JobDetailPage({
                 task={task}
                 vehicleId={id}
                 fitters={fitters ?? []}
+                assignedFitters={taskFittersMap[task.id] ?? []}
               />
             ))}
           </div>
