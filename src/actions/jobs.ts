@@ -12,6 +12,12 @@ export async function createJob(formData: FormData) {
 
   const buildType = formData.get('build_type') as string
 
+  // 0. Generate unique job ID (AXM-XXXXX)
+  const { count } = await supabase
+    .from('vehicles')
+    .select('*', { count: 'exact', head: true })
+  const jobId = `AXM-${String((count ?? 0) + 1).padStart(5, '0')}`
+
   // 1. Create customer
   const { data: customer, error: customerError } = await supabase
     .from('customers')
@@ -29,7 +35,7 @@ export async function createJob(formData: FormData) {
   const { data: vehicle, error: vehicleError } = await supabase
     .from('vehicles')
     .insert({
-      job_id:                    '',
+      job_id:                    jobId,
       vehicle_make:              formData.get('vehicle_make') as string,
       vehicle_model:             formData.get('vehicle_model') as string,
       vehicle_year:              Number(formData.get('vehicle_year')) || null,
@@ -51,6 +57,15 @@ export async function createJob(formData: FormData) {
   await supabase
     .from('qr_codes')
     .insert({ vehicle_id: vehicle.id, generated_by: user.id, is_active: true })
+
+  // 3b. Log job creation
+  await supabase.from('activity_log').insert({
+    vehicle_id: vehicle.id,
+    user_id:    user.id,
+    action:     'job_created',
+    old_value:  null,
+    new_value:  { job_id: jobId, build_type: buildType },
+  })
 
   // 4. Auto-create standard tasks
   const standardTasks = [
@@ -81,7 +96,20 @@ export async function updateBuildStatus(formData: FormData) {
   const vehicleId   = formData.get('vehicle_id') as string
   const buildStatus = formData.get('build_status') as string
 
-  await supabase.from('vehicles').update({ build_status: buildStatus }).eq('id', vehicleId)
+  await supabase.from('vehicles').update({
+    build_status: buildStatus,
+    ...(buildStatus === 'delivered' ? { handover_date: new Date().toISOString().split('T')[0] } : {}),
+  }).eq('id', vehicleId)
+
+  // Log status change
+  await supabase.from('activity_log').insert({
+    vehicle_id: vehicleId,
+    user_id:    user.id,
+    action:     'status_changed',
+    old_value:  null,
+    new_value:  { status: buildStatus },
+  })
+
   revalidatePath(`/ops/jobs/${vehicleId}`)
 }
 
@@ -94,6 +122,15 @@ export async function saveJobNotes(formData: FormData) {
   const notes     = formData.get('notes') as string
 
   await supabase.from('vehicles').update({ notes }).eq('id', vehicleId)
+
+  await supabase.from('activity_log').insert({
+    vehicle_id: vehicleId,
+    user_id:    user.id,
+    action:     'notes_saved',
+    old_value:  null,
+    new_value:  { notes },
+  })
+
   revalidatePath(`/ops/jobs/${vehicleId}`)
 }
 

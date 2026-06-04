@@ -40,19 +40,14 @@ export default async function JobsPage({
     query = query.eq('build_status', status as BuildStatus)
   }
 
-  const { data: vehicles } = await query
-
-  // Client-side search filter
-  const filtered = vehicles?.filter(v => {
-    if (!q) return true
-    const search = q.toLowerCase()
-    return (
-      v.job_id.toLowerCase().includes(search) ||
-      v.vehicle_make.toLowerCase().includes(search) ||
-      v.vehicle_model.toLowerCase().includes(search) ||
-      (v.customers as { name: string } | null)?.name?.toLowerCase().includes(search)
+  if (q) {
+    query = query.or(
+      `job_id.ilike.%${q}%,vehicle_make.ilike.%${q}%,vehicle_model.ilike.%${q}%`
     )
-  }) ?? []
+  }
+
+  const { data: vehicles } = await query
+  const filtered = vehicles ?? []
 
   const statuses: { value: string; label: string }[] = [
     { value: 'all',              label: 'All' },
@@ -111,6 +106,9 @@ export default async function JobsPage({
         <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
           {filtered.map(v => {
             const customer = v.customers as { name: string } | null
+            const isOverdue = v.estimated_completion_date &&
+              new Date(v.estimated_completion_date) < new Date() &&
+              !['completed', 'delivered'].includes(v.build_status)
             return (
               <a
                 key={v.id}
@@ -120,6 +118,7 @@ export default async function JobsPage({
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-slate-900">
                     {v.vehicle_year} {v.vehicle_make} {v.vehicle_model}
+                    {isOverdue && <span className="ml-2 text-xs font-medium text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full">Overdue</span>}
                   </p>
                   <p className="text-xs text-slate-400 mt-0.5">
                     {v.job_id} · {v.build_type}

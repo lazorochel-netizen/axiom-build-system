@@ -119,7 +119,9 @@ export default async function CustomerPortalPage({
 
         <p className="text-xs text-center text-slate-400 pb-4">
           Questions? Contact Axiom Group on{' '}
-          <a href="tel:+61" className="underline">our workshop number</a>.
+          <a href={`tel:${process.env.NEXT_PUBLIC_WORKSHOP_PHONE ?? ''}`} className="underline">
+            {process.env.NEXT_PUBLIC_WORKSHOP_PHONE ?? 'our workshop number'}
+          </a>.
         </p>
       </div>
     </div>

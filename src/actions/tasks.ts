@@ -45,6 +45,17 @@ export async function updateTask(formData: FormData) {
     ...(status !== 'completed' ? { completed_by: null, completed_at: null } : {}),
   }).eq('id', taskId)
 
+  if (status === 'completed') {
+    await supabase.from('activity_log').insert({
+      vehicle_id: vehicleId,
+      task_id:    taskId,
+      user_id:    user.id,
+      action:     'task_completed',
+      old_value:  null,
+      new_value:  { status },
+    })
+  }
+
   revalidatePath(`/ops/jobs/${vehicleId}`)
 }
 

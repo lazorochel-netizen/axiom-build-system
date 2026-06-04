@@ -108,7 +108,7 @@ export default async function FitterDashboard() {
                   <div className={`w-2 h-2 rounded-full shrink-0 ${
                     task.status === 'completed'    ? 'bg-green-400' :
                     task.status === 'in_progress'  ? 'bg-blue-400'  :
-                    task.status === 'waiting_for_kit' ? 'bg-amber-400' :
+                    task.status === 'waiting_on_parts' ? 'bg-amber-400' :
                     'bg-slate-200'
                   }`} />
                   <div className="flex-1 min-w-0">
@@ -120,7 +120,7 @@ export default async function FitterDashboard() {
                   <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                     task.status === 'completed'       ? 'bg-green-100 text-green-700' :
                     task.status === 'in_progress'     ? 'bg-blue-100 text-blue-700'   :
-                    task.status === 'waiting_for_kit' ? 'bg-amber-100 text-amber-700' :
+                    task.status === 'waiting_on_parts' ? 'bg-amber-100 text-amber-700' :
                     'bg-slate-100 text-slate-500'
                   }`}>
                     {task.status.replace(/_/g, ' ')}

@@ -72,7 +72,11 @@ export default async function OpsDashboard() {
           <p className="text-sm text-slate-400">No active jobs.</p>
         ) : (
           <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
-            {active.map(v => (
+            {active.map(v => {
+              const isOverdue = v.estimated_completion_date &&
+                new Date(v.estimated_completion_date) < new Date() &&
+                !['completed', 'delivered'].includes(v.build_status)
+              return (
               <a
                 key={v.id}
                 href={`/ops/jobs/${v.id}`}
@@ -81,6 +85,7 @@ export default async function OpsDashboard() {
                 <div>
                   <p className="text-sm font-medium text-slate-900">
                     {v.vehicle_year} {v.vehicle_make} {v.vehicle_model}
+                    {isOverdue && <span className="ml-2 text-xs font-medium text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full">Overdue</span>}
                   </p>
                   <p className="text-xs text-slate-400">{v.job_id} · {v.build_type}</p>
                 </div>
@@ -88,7 +93,7 @@ export default async function OpsDashboard() {
                   {STATUS_LABELS[v.build_status as BuildStatus]}
                 </span>
               </a>
-            ))}
+            )})}
           </div>
         )}
       </section>

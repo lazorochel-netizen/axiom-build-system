@@ -1,13 +1,24 @@
 import { createClient } from '@/lib/supabase/server'
 import type { Customer, Vehicle } from '@/types/database'
 
-export default async function CustomersPage() {
+export default async function CustomersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>
+}) {
+  const { q } = await searchParams
   const supabase = await createClient()
 
-  const { data: customers } = await supabase
+  let query = supabase
     .from('customers')
     .select('*, vehicles(id, job_id, vehicle_make, vehicle_model, build_status)')
     .order('created_at', { ascending: false })
+
+  if (q) {
+    query = query.or(`name.ilike.%${q}%,email.ilike.%${q}%,phone.ilike.%${q}%`)
+  }
+
+  const { data: customers } = await query
 
   return (
     <div className="max-w-4xl space-y-6">
@@ -15,6 +26,17 @@ export default async function CustomersPage() {
         <h1 className="text-xl font-semibold text-slate-900">Customers</h1>
         <span className="text-sm text-slate-400">{customers?.length ?? 0} total</span>
       </div>
+
+      {/* Search */}
+      <form method="get" action="/ops/customers">
+        <input
+          type="text"
+          name="q"
+          defaultValue={q}
+          placeholder="Search by name, email, or phone…"
+          className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </form>
 
       {!customers?.length ? (
         <p className="text-sm text-slate-400 py-8 text-center">No customers yet.</p>
