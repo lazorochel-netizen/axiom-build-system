@@ -27,10 +27,13 @@ const TASK_CATEGORIES = [
 
 export default async function JobDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ error?: string }>
 }) {
   const { id } = await params
+  const { error } = await searchParams
   const supabase = await createClient()
 
   const { data: vehicle } = await supabase
@@ -88,6 +91,12 @@ export default async function JobDetailPage({
 
   return (
     <div className="max-w-3xl space-y-6">
+
+      {error && (
+        <div className="px-4 py-2.5 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+          ⚠ {error}
+        </div>
+      )}
 
       {/* Header */}
       <div className="flex items-start justify-between">

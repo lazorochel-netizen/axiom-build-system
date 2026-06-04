@@ -21,10 +21,17 @@ export default async function NewJobPage({
     rego:       params.rego       ?? '',
     build_type: params.build_type ?? '',
   }
+  const error = params.error ?? null
 
   return (
     <div className="max-w-2xl">
       <h1 className="text-xl font-semibold text-slate-900 mb-6">New Job</h1>
+
+      {error && (
+        <div className="mb-4 px-4 py-2.5 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+          ⚠ {error}
+        </div>
+      )}
 
       {pre.customer && (
         <div className="mb-4 px-4 py-2.5 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">

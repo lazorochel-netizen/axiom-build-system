@@ -29,7 +29,7 @@ export async function createJob(formData: FormData) {
     .select('id')
     .single()
 
-  if (customerError) throw new Error(`Customer creation failed: ${customerError.message}`)
+  if (customerError) redirect(`/ops/jobs/new?error=${encodeURIComponent('Could not create customer: ' + customerError.message)}`)
 
   // 2. Create vehicle
   const { data: vehicle, error: vehicleError } = await supabase
@@ -51,7 +51,7 @@ export async function createJob(formData: FormData) {
     .select('id')
     .single()
 
-  if (vehicleError) throw new Error(`Vehicle creation failed: ${vehicleError.message}`)
+  if (vehicleError) redirect(`/ops/jobs/new?error=${encodeURIComponent('Could not create job: ' + vehicleError.message)}`)
 
   // 3. Generate QR code
   await supabase

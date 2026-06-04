@@ -17,6 +17,11 @@ export async function uploadTaskPhoto(formData: FormData) {
   const fileName = `${vehicleId}/${taskId}/${Date.now()}.${ext}`
   const bytes    = await file.arrayBuffer()
 
+  // Try to identify the uploader from their auth session
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const uploadedBy = user?.id ?? null
+
   const admin = createAdminClient()
   const { error: uploadError } = await admin.storage
     .from('job-photos')
@@ -32,7 +37,7 @@ export async function uploadTaskPhoto(formData: FormData) {
     vehicle_id:          vehicleId,
     task_id:             taskId,
     image_url:           publicUrl,
-    uploaded_by:         null,
+    uploaded_by:         uploadedBy,
     is_customer_visible: false,
   })
 

@@ -141,6 +141,19 @@ export interface ActivityLog {
   created_at: string
 }
 
+export interface BuildLog {
+  id: string
+  name: string
+  customer_name: string | null
+  vehicle_info: string | null
+  spec_label: string | null
+  rego_vin: string | null
+  total_amount: number
+  addon_rows: { ticked: boolean; desc: string; price?: number }[] | null
+  created_at: string
+  updated_at: string
+}
+
 // Supabase Database type wrapper (used by createClient<Database>)
 export type Database = {
   public: {
@@ -156,6 +169,7 @@ export type Database = {
       documents:      { Row: Document;      Insert: Omit<Document, 'id' | 'uploaded_at'>; Update: Partial<Document> }
       photos:         { Row: Photo;         Insert: Omit<Photo, 'id' | 'uploaded_at'>; Update: Partial<Photo> }
       activity_log:   { Row: ActivityLog;   Insert: Omit<ActivityLog, 'id' | 'created_at'>; Update: never }
+      build_logs:     { Row: BuildLog;      Insert: Omit<BuildLog, 'id' | 'created_at' | 'updated_at'>; Update: Partial<BuildLog> }
     }
     Enums: {
       user_role:        UserRole

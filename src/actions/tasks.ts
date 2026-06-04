@@ -8,10 +8,34 @@ import { redirect } from 'next/navigation'
 export async function completeTask(taskId: string, vehicleToken: string) {
   const admin = createAdminClient()
 
+  // Try to identify the fitter from their auth session (if logged in)
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const completedBy = user?.id ?? null
+
   await (admin.from('tasks') as any).update({
     status:       'completed',
+    completed_by: completedBy,
     completed_at: new Date().toISOString(),
   }).eq('id', taskId)
+
+  // Log to activity trail
+  if (completedBy) {
+    const { data: task } = await (admin.from('tasks') as any)
+      .select('vehicle_id')
+      .eq('id', taskId)
+      .single()
+    if (task?.vehicle_id) {
+      await (admin.from('activity_log') as any).insert({
+        vehicle_id: task.vehicle_id,
+        task_id:    taskId,
+        user_id:    completedBy,
+        action:     'task_completed',
+        old_value:  null,
+        new_value:  { status: 'completed', via: 'qr' },
+      })
+    }
+  }
 
   revalidatePath(`/job/${vehicleToken}`)
 }
@@ -20,7 +44,7 @@ export async function uncompleteTask(taskId: string, vehicleToken: string) {
   const admin = createAdminClient()
 
   await (admin.from('tasks') as any).update({
-    status: 'pending',
+    status:       'pending',
     completed_by: null,
     completed_at: null,
   }).eq('id', taskId)

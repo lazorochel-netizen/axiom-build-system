@@ -4,15 +4,15 @@ import type { BuildStatus } from '@/types/database'
 const STATUS_LABELS: Record<BuildStatus, string> = {
   pending:                'Pending',
   in_progress:            'In Progress',
-  waiting_on_parts:       'Waiting for the Kit',
-  waiting_on_compliance:  'Waiting for the Kit',
+  waiting_on_parts:       'Waiting for Kit',
+  waiting_on_compliance:  'In Compliance',
   completed:              'Completed',
   delivered:              'Delivered',
 }
 
-// Only show these statuses on the dashboard summary
+// All statuses shown as summary tiles on the dashboard
 const DASHBOARD_STATUSES: BuildStatus[] = [
-  'pending', 'in_progress', 'waiting_on_parts', 'completed', 'delivered'
+  'pending', 'in_progress', 'waiting_on_parts', 'waiting_on_compliance', 'completed', 'delivered'
 ]
 
 const STATUS_COLOURS: Record<BuildStatus, string> = {
@@ -49,13 +49,9 @@ export default async function OpsDashboard() {
       </div>
 
       {/* Summary pills */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-6 gap-3">
         {DASHBOARD_STATUSES.map(status => {
-          const count = vehicles?.filter(v =>
-            status === 'waiting_on_parts'
-              ? v.build_status === 'waiting_on_parts' || v.build_status === 'waiting_on_compliance'
-              : v.build_status === status
-          ).length ?? 0
+          const count = vehicles?.filter(v => v.build_status === status).length ?? 0
           return (
             <div key={status} className="bg-white rounded-xl border border-slate-200 p-4">
               <p className="text-2xl font-bold text-slate-900">{count}</p>
