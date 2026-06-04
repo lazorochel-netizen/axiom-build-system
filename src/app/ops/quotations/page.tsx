@@ -19,7 +19,6 @@ export default async function QuotationsPage() {
     supabase
       .from('build_logs')
       .select('*')
-      .is('vehicle_id', null)
       .order('created_at', { ascending: false })
       .limit(20),
   ])
