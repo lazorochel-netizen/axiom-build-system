@@ -48,6 +48,32 @@ export async function updateTask(formData: FormData) {
   revalidatePath(`/ops/jobs/${vehicleId}`)
 }
 
+export async function deleteTask(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const taskId    = formData.get('task_id') as string
+  const vehicleId = formData.get('vehicle_id') as string
+
+  await supabase.from('tasks').delete().eq('id', taskId)
+  revalidatePath(`/ops/jobs/${vehicleId}`)
+}
+
+export async function editTaskName(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const taskId    = formData.get('task_id') as string
+  const vehicleId = formData.get('vehicle_id') as string
+  const taskName  = formData.get('task_name') as string
+  const taskCategory = formData.get('task_category') as string
+
+  await supabase.from('tasks').update({ task_name: taskName, task_category: taskCategory }).eq('id', taskId)
+  revalidatePath(`/ops/jobs/${vehicleId}`)
+}
+
 export async function addTask(formData: FormData) {
   const supabase = await createClient()
 
