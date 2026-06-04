@@ -59,6 +59,10 @@ export default async function JobDetailPage({
     .select('user_id, users(id, name)')
     .eq('vehicle_id', id)
 
+  const tasks = (vehicle.tasks ?? []).sort(
+    (a: { task_order: number }, b: { task_order: number }) => a.task_order - b.task_order
+  )
+
   // Fetch task fitters
   const taskIds = tasks.map((t: any) => t.id)
   const { data: taskFitters } = taskIds.length > 0
@@ -74,9 +78,6 @@ export default async function JobDetailPage({
     return acc
   }, {} as Record<string, { id: string; name: string }[]>)
 
-  const tasks = (vehicle.tasks ?? []).sort(
-    (a: { task_order: number }, b: { task_order: number }) => a.task_order - b.task_order
-  )
   const totalTasks = tasks.length
   const doneTasks  = tasks.filter((t: { status: TaskStatus }) => t.status === 'completed').length
 
