@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 
 export async function createJob(formData: FormData) {
   const supabase = await createClient()
@@ -51,31 +52,37 @@ export async function createJob(formData: FormData) {
     .from('qr_codes')
     .insert({ vehicle_id: vehicle.id, generated_by: user.id, is_active: true })
 
-  // 4. Auto-populate standard tasks from templates
-  const { data: templates } = await supabase
-    .from('task_templates')
-    .select('task_name, task_category, task_order, role_required, is_required, photo_required')
-    .eq('build_type', buildType)
-    .eq('is_upgrade', false)   // standard tasks only — upgrades added separately
-    .order('task_order', { ascending: true })
+  // 4. Auto-create standard tasks
+  const standardTasks = [
+    { task_name: 'Conversion Kit Fitted',   task_category: 'Structure & Materials', task_order: 1 },
+    { task_name: 'Electric & Water Fitted', task_category: 'Electrical & Plumbing', task_order: 2 },
+    { task_name: 'Upgrades',               task_category: 'Upgrades',              task_order: 3 },
+  ]
 
-  if (templates && templates.length > 0) {
-    const tasks = templates.map(t => ({
-      vehicle_id:     vehicle.id,
-      task_name:      t.task_name,
-      task_category:  t.task_category,
-      task_order:     t.task_order,
-      role_required:  t.role_required,
-      is_required:    t.is_required,
-      photo_required: t.photo_required,
-      status:         'pending' as const,
+  await supabase.from('tasks').insert(
+    standardTasks.map(t => ({
+      ...t,
+      vehicle_id:    vehicle.id,
+      role_required: 'fitter' as const,
+      is_required:   true,
+      photo_required: false,
+      status:        'pending' as const,
     }))
-
-    const { error: tasksError } = await supabase.from('tasks').insert(tasks)
-    if (tasksError) throw new Error(`Task creation failed: ${tasksError.message}`)
-  }
+  )
 
   redirect(`/ops/jobs/${vehicle.id}`)
+}
+
+export async function saveJobNotes(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const vehicleId = formData.get('vehicle_id') as string
+  const notes     = formData.get('notes') as string
+
+  await supabase.from('vehicles').update({ notes }).eq('id', vehicleId)
+  revalidatePath(`/ops/jobs/${vehicleId}`)
 }
 
 export async function deleteJob(formData: FormData) {

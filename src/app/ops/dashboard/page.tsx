@@ -49,7 +49,7 @@ export default async function OpsDashboard() {
       </div>
 
       {/* Summary pills */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         {DASHBOARD_STATUSES.map(status => {
           const count = vehicles?.filter(v =>
             status === 'waiting_on_parts'

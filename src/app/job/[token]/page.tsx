@@ -24,7 +24,7 @@ export default async function FitterJobPage({
     .from('vehicles')
     .select(`
       job_id, vehicle_make, vehicle_model, vehicle_year,
-      build_status, build_type,
+      build_status, build_type, notes,
       tasks ( id, task_name, task_category, task_order, status, photo_required, notes )
     `)
     .eq('id', qr.vehicle_id)
@@ -65,6 +65,14 @@ export default async function FitterJobPage({
             />
           </div>
         </div>
+
+        {/* Additional Task Notes from ops */}
+        {vehicle.notes && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+            <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-1">Task Notes from Ops</p>
+            <p className="text-sm text-amber-900 whitespace-pre-line">{vehicle.notes}</p>
+          </div>
+        )}
 
         {/* All done banner */}
         {allDone && (

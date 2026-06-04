@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { addTask } from '@/actions/tasks'
+import { saveJobNotes } from '@/actions/jobs'
 import type { TaskStatus } from '@/types/database'
 import TaskRow from '@/components/TaskRow'
 import DeleteJobButton from '@/components/DeleteJobButton'
@@ -205,6 +206,29 @@ export default async function JobDetailPage({
             </button>
           </form>
         </details>
+      </section>
+
+      {/* Additional Task Notes */}
+      <section>
+        <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">Additional Task Notes</h2>
+        <div className="bg-white rounded-xl border border-slate-200 p-4">
+          <form action={saveJobNotes} className="space-y-3">
+            <input type="hidden" name="vehicle_id" value={id} />
+            <textarea
+              name="notes"
+              defaultValue={vehicle.notes ?? ''}
+              rows={4}
+              placeholder="Add notes for the fitter — e.g. customer requests, special upgrades, changes to the build..."
+              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            />
+            <button
+              type="submit"
+              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+            >
+              Save Notes
+            </button>
+          </form>
+        </div>
       </section>
 
       {/* QR Code */}
