@@ -10,6 +10,7 @@ type Task = {
   task_category: string
   status: string
   assigned_to: string | null
+  due_date: string | null
 }
 
 type Fitter = {
@@ -18,10 +19,11 @@ type Fitter = {
 }
 
 const STATUS_COLOURS: Record<string, string> = {
-  pending:          'bg-slate-100 text-slate-600',
-  in_progress:      'bg-blue-100 text-blue-700',
-  waiting_for_kit:  'bg-amber-100 text-amber-700',
-  completed:        'bg-green-100 text-green-700',
+  pending:               'bg-slate-100 text-slate-600',
+  in_progress:           'bg-blue-100 text-blue-700',
+  waiting_on_parts:      'bg-amber-100 text-amber-700',
+  waiting_on_compliance: 'bg-purple-100 text-purple-700',
+  completed:             'bg-green-100 text-green-700',
 }
 
 const TASK_CATEGORIES = [
@@ -117,6 +119,15 @@ export default function TaskRow({
           <p className="text-sm font-medium text-slate-900">{taskName}</p>
           <div className="flex items-center gap-1 flex-wrap mt-0.5">
             <p className="text-xs text-slate-400">{category}</p>
+            {task.due_date && status !== 'completed' && (
+              <>
+                <span className="text-slate-300 text-xs">·</span>
+                <span className={`text-xs ${new Date(task.due_date) < new Date() ? 'text-red-500 font-medium' : 'text-slate-400'}`}>
+                  {new Date(task.due_date) < new Date() ? '⚠ Overdue · ' : 'Due '}
+                  {new Date(task.due_date).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })}
+                </span>
+              </>
+            )}
             {localAssigned.length > 0 && (
               <>
                 <span className="text-slate-300 text-xs">·</span>
@@ -172,7 +183,7 @@ export default function TaskRow({
             >
               <option value="pending">Pending</option>
               <option value="in_progress">In Progress</option>
-              <option value="waiting_for_kit">Waiting for the Kit</option>
+              <option value="waiting_on_parts">Waiting for the Kit</option>
               <option value="completed">Completed</option>
             </select>
           </div>

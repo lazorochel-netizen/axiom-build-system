@@ -21,7 +21,7 @@ export default async function InvoicesPage() {
     { data: customers },
     buildLogsResult,
   ] = await Promise.all([
-    supabase.from('invoices').select('*, vehicles(job_id, vehicle_make, vehicle_model, id), customers(name)').order('created_at', { ascending: false }),
+    supabase.from('invoices').select('*, vehicles(job_id, vehicle_make, vehicle_model, id), customers(name), invoice_items(id, description, quantity, unit_price)').order('created_at', { ascending: false }),
     supabase.from('quotations').select('*, vehicles(job_id, vehicle_make, vehicle_model), customers(name)').in('status', ['draft', 'sent', 'accepted']).order('created_at', { ascending: false }),
     supabase.from('vehicles').select('id, job_id, vehicle_make, vehicle_model, customer_id').order('created_at', { ascending: false }),
     supabase.from('customers').select('id, name').order('name'),
@@ -58,15 +58,29 @@ export default async function InvoicesPage() {
               </select>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">Total Amount *</label>
-              <input name="total_amount" type="number" required placeholder="e.g. 19999" className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Due Date</label>
+            <input name="due_date" type="date" className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+
+          {/* Line items */}
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-2">Line Items</label>
+            <div className="space-y-2">
+              {[0, 1, 2, 3].map(i => (
+                <div key={i} className="grid grid-cols-[1fr_80px_100px] gap-2">
+                  <input name="item_desc" placeholder={i === 0 ? 'e.g. Conversion Kit — Hiace SLWB' : 'Description'} className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <input name="item_qty" type="number" step="0.01" defaultValue="1" placeholder="Qty" className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-right" />
+                  <input name="item_price" type="number" step="0.01" placeholder="Price" className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-right" />
+                </div>
+              ))}
             </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">Due Date</label>
-              <input name="due_date" type="date" className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
+            <p className="text-xs text-slate-400 mt-1">Total is calculated automatically from line items. Leave all items blank to enter a manual total below.</p>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Manual Total (if no line items)</label>
+            <input name="total_amount" type="number" step="0.01" placeholder="e.g. 19999" className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-600 mb-1">Notes</label>
@@ -142,7 +156,8 @@ export default async function InvoicesPage() {
         ) : (
           <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
             {invoices.map((inv: any) => (
-              <div key={inv.id} className="flex items-center justify-between px-5 py-4 gap-4">
+              <div key={inv.id} className="px-5 py-4 space-y-2">
+                <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium text-slate-900">{inv.customers?.name ?? '—'}</p>
@@ -172,6 +187,22 @@ export default async function InvoicesPage() {
                     )}
                   </form>
                 </div>
+                </div>
+                {/* Line items breakdown */}
+                {inv.invoice_items && inv.invoice_items.length > 0 && (
+                  <div className="border-t border-slate-100 pt-2 space-y-1">
+                    {inv.invoice_items.map((item: any) => (
+                      <div key={item.id} className="flex justify-between text-xs text-slate-600">
+                        <span>{item.description} {item.quantity !== 1 && `× ${item.quantity}`}</span>
+                        <span className="font-medium">${(item.quantity * item.unit_price).toLocaleString('en-AU', { minimumFractionDigits: 2 })}</span>
+                      </div>
+                    ))}
+                    <div className="flex justify-between text-xs font-semibold text-slate-900 border-t border-slate-200 pt-1 mt-1">
+                      <span>Total</span>
+                      <span>${Number(inv.total_amount).toLocaleString('en-AU', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>

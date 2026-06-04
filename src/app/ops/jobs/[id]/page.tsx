@@ -4,10 +4,12 @@ import { addTask } from '@/actions/tasks'
 import { saveJobNotes } from '@/actions/jobs'
 import { togglePhotoVisibility } from '@/actions/photos'
 import { assignFitterToJob, removeFitterFromJob } from '@/actions/job-fitters'
+import { uploadDocument, deleteDocument } from '@/actions/documents'
 import BuildStatusSelect from '@/components/BuildStatusSelect'
 import type { TaskStatus } from '@/types/database'
 import TaskRow from '@/components/TaskRow'
 import DeleteJobButton from '@/components/DeleteJobButton'
+import SubmitButton from '@/components/SubmitButton'
 
 const TASK_STATUS_COLOURS: Record<string, string> = {
   pending:         'bg-slate-100 text-slate-600',
@@ -45,7 +47,8 @@ export default async function JobDetailPage({
         customers ( name, email, phone ),
         tasks ( * ),
         qr_codes ( token, is_active ),
-        photos ( id, image_url, is_customer_visible, uploaded_at )
+        photos ( id, image_url, is_customer_visible, uploaded_at ),
+        documents ( id, document_name, document_type, file_url, uploaded_at )
       `)
       .eq('id', id)
       .single(),
@@ -65,14 +68,22 @@ export default async function JobDetailPage({
     (a: { task_order: number }, b: { task_order: number }) => a.task_order - b.task_order
   )
 
-  // Fetch task fitters (depends on tasks being resolved first)
+  // Fetch task fitters + activity log in parallel (both depend on tasks/vehicle being resolved)
   const taskIds = tasks.map((t: any) => t.id)
-  const { data: taskFitters } = taskIds.length > 0
-    ? await supabase
-        .from('task_fitters')
-        .select('task_id, user_id, users(id, name)')
-        .in('task_id', taskIds)
-    : { data: [] }
+  const [{ data: taskFitters }, { data: activityLog }] = await Promise.all([
+    taskIds.length > 0
+      ? supabase
+          .from('task_fitters')
+          .select('task_id, user_id, users(id, name)')
+          .in('task_id', taskIds)
+      : Promise.resolve({ data: [] }),
+    supabase
+      .from('activity_log')
+      .select('id, action, new_value, created_at, users(name)')
+      .eq('vehicle_id', id)
+      .order('created_at', { ascending: false })
+      .limit(20),
+  ])
 
   const taskFittersMap = (taskFitters ?? []).reduce((acc: any, tf: any) => {
     if (!acc[tf.task_id]) acc[tf.task_id] = []
@@ -164,9 +175,7 @@ export default async function JobDetailPage({
                 <option key={f.id} value={f.id}>{f.name}</option>
               ))}
             </select>
-            <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
-              Assign
-            </button>
+            <SubmitButton label="Assign" pendingLabel="Assigning…" />
           </form>
         )}
       </section>
@@ -192,7 +201,7 @@ export default async function JobDetailPage({
           <p className="text-sm text-slate-400 mb-4">No tasks added yet.</p>
         ) : (
           <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100 mb-4">
-            {tasks.map((task: { id: string; task_name: string; task_category: string; status: TaskStatus; assigned_to: string | null }) => (
+            {tasks.map((task: { id: string; task_name: string; task_category: string; status: TaskStatus; assigned_to: string | null; due_date: string | null }) => (
               <TaskRow
                 key={task.id}
                 task={task}
@@ -234,7 +243,7 @@ export default async function JobDetailPage({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">Assign to Fitter</label>
                 <select
@@ -246,6 +255,14 @@ export default async function JobDetailPage({
                     <option key={f.id} value={f.id}>{f.name}</option>
                   ))}
                 </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Due Date</label>
+                <input
+                  type="date"
+                  name="due_date"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">Order</label>
@@ -263,12 +280,7 @@ export default async function JobDetailPage({
               Photo required for this task
             </label>
 
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-            >
-              Add Task
-            </button>
+            <SubmitButton label="Add Task" pendingLabel="Adding…" />
           </form>
         </details>
       </section>
@@ -286,12 +298,7 @@ export default async function JobDetailPage({
               placeholder="Add notes for the fitter — e.g. customer requests, special upgrades, changes to the build..."
               className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             />
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-            >
-              Save Notes
-            </button>
+            <SubmitButton label="Save Notes" pendingLabel="Saving…" />
           </form>
         </div>
       </section>
@@ -357,6 +364,96 @@ export default async function JobDetailPage({
                 </a>
               </div>
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* Documents */}
+      <section>
+        <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">Documents</h2>
+
+        {/* Existing docs */}
+        {vehicle.documents && vehicle.documents.length > 0 && (
+          <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100 mb-3">
+            {(vehicle.documents as { id: string; document_name: string; document_type: string; file_url: string; uploaded_at: string }[]).map(doc => (
+              <div key={doc.id} className="flex items-center justify-between px-4 py-3 gap-3">
+                <div className="flex-1 min-w-0">
+                  <a href={doc.file_url} target="_blank" rel="noopener noreferrer"
+                    className="text-sm font-medium text-blue-600 hover:underline truncate block">
+                    {doc.document_name}
+                  </a>
+                  <p className="text-xs text-slate-400 mt-0.5">{doc.document_type} · {new Date(doc.uploaded_at).toLocaleDateString('en-AU')}</p>
+                </div>
+                <form action={deleteDocument}>
+                  <input type="hidden" name="document_id" value={doc.id} />
+                  <input type="hidden" name="vehicle_id" value={id} />
+                  <button type="submit" className="text-xs text-red-400 hover:text-red-600 transition-colors">Remove</button>
+                </form>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Upload form */}
+        <details className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+          <summary className="px-4 py-3 text-sm font-medium text-slate-700 cursor-pointer hover:bg-slate-50 select-none">
+            + Upload Document
+          </summary>
+          <form action={uploadDocument} encType="multipart/form-data" className="px-4 pb-4 pt-2 space-y-3 border-t border-slate-100">
+            <input type="hidden" name="vehicle_id" value={id} />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Document Name</label>
+                <input name="document_name" placeholder="e.g. Compliance Certificate"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Type</label>
+                <select name="document_type"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="Compliance Certificate">Compliance Certificate</option>
+                  <option value="Inspection Report">Inspection Report</option>
+                  <option value="Invoice">Invoice</option>
+                  <option value="Warranty">Warranty</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1">File *</label>
+              <input type="file" name="document" required accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                className="block w-full text-sm text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+            </div>
+            <SubmitButton label="Upload" pendingLabel="Uploading…" />
+          </form>
+        </details>
+      </section>
+
+      {/* Activity Log */}
+      {activityLog && activityLog.length > 0 && (
+        <section>
+          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">Activity</h2>
+          <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
+            {activityLog.map((entry: any) => {
+              const actionLabel: Record<string, string> = {
+                job_created:    'Job created',
+                status_changed: `Status → ${(entry.new_value?.status as string ?? '').replace(/_/g, ' ')}`,
+                task_completed: 'Task completed',
+                notes_saved:    'Notes updated',
+              }
+              const label = actionLabel[entry.action] ?? entry.action.replace(/_/g, ' ')
+              const who = entry.users?.name ?? 'System'
+              const when = new Date(entry.created_at).toLocaleDateString('en-AU', {
+                day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+              })
+              return (
+                <div key={entry.id} className="flex items-center gap-3 px-4 py-2.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-slate-300 shrink-0" />
+                  <p className="text-sm text-slate-700 flex-1">{label}</p>
+                  <p className="text-xs text-slate-400 shrink-0">{who} · {when}</p>
+                </div>
+              )
+            })}
           </div>
         </section>
       )}

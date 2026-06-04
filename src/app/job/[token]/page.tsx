@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { completeTask, uncompleteTask } from '@/actions/tasks'
 import type { TaskStatus } from '@/types/database'
 import FitterTaskCard from '@/components/FitterTaskCard'
@@ -10,7 +10,7 @@ export default async function FitterJobPage({
   params: Promise<{ token: string }>
 }) {
   const { token } = await params
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { data: qr } = await supabase
     .from('qr_codes')

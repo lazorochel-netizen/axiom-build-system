@@ -10,21 +10,44 @@ export async function createInvoice(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const vehicleId   = formData.get('vehicle_id') as string || null
-  const customerId  = formData.get('customer_id') as string || null
-  const amount      = parseFloat(formData.get('total_amount') as string) || 0
-  const dueDate     = formData.get('due_date') as string || null
-  const notes       = formData.get('notes') as string || null
+  const vehicleId  = formData.get('vehicle_id') as string || null
+  const customerId = formData.get('customer_id') as string || null
+  const dueDate    = formData.get('due_date') as string || null
+  const notes      = formData.get('notes') as string || null
 
-  await supabase.from('invoices').insert({
+  // Parse line items from repeated fields: item_desc[], item_qty[], item_price[]
+  const descs  = formData.getAll('item_desc')  as string[]
+  const qtys   = formData.getAll('item_qty')   as string[]
+  const prices = formData.getAll('item_price') as string[]
+
+  const lineItems = descs
+    .map((desc, i) => ({
+      description: desc,
+      quantity:    parseFloat(qtys[i] ?? '1') || 1,
+      unit_price:  parseFloat(prices[i] ?? '0') || 0,
+    }))
+    .filter(item => item.description.trim())
+
+  const totalAmount = lineItems.length > 0
+    ? lineItems.reduce((sum, item) => sum + item.quantity * item.unit_price, 0)
+    : parseFloat(formData.get('total_amount') as string) || 0
+
+  const { data: invoice } = await supabase.from('invoices').insert({
     vehicle_id:   vehicleId,
     customer_id:  customerId,
     created_by:   user.id,
-    total_amount: amount,
+    total_amount: totalAmount,
     status:       'draft',
     due_date:     dueDate || null,
     notes:        notes || null,
-  })
+  }).select('id').single()
+
+  // Insert line items if any
+  if (invoice && lineItems.length > 0) {
+    await supabase.from('invoice_items').insert(
+      lineItems.map(item => ({ ...item, invoice_id: invoice.id }))
+    )
+  }
 
   revalidatePath('/ops/invoices')
 }

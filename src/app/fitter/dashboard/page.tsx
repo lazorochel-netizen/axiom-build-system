@@ -1,7 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
 import JobNoteForm from '@/components/JobNoteForm'
 
-export default async function FitterDashboard() {
+export default async function FitterDashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ filter?: string }>
+}) {
+  const { filter } = await searchParams
+  const showMine = filter === 'mine'
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -27,7 +33,23 @@ export default async function FitterDashboard() {
 
   return (
     <div className="space-y-5">
-      <h1 className="text-lg font-semibold text-slate-900">My Jobs</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-lg font-semibold text-slate-900">My Jobs</h1>
+        <div className="flex gap-1 bg-slate-100 rounded-lg p-1 text-xs font-medium">
+          <a
+            href="/fitter/dashboard"
+            className={`px-3 py-1 rounded-md transition-colors ${!showMine ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            All Tasks
+          </a>
+          <a
+            href="/fitter/dashboard?filter=mine"
+            className={`px-3 py-1 rounded-md transition-colors ${showMine ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            My Tasks
+          </a>
+        </div>
+      </div>
 
       {vehicles.length === 0 && (
         <div className="text-center py-12">
@@ -38,7 +60,10 @@ export default async function FitterDashboard() {
 
       {vehicles.map((vehicle: any) => {
         const activeQR = vehicle.qr_codes?.find((q: any) => q.is_active)
-        const tasks = (vehicle.tasks ?? []).sort((a: any, b: any) => a.task_order - b.task_order)
+        const allTasks = (vehicle.tasks ?? []).sort((a: any, b: any) => a.task_order - b.task_order)
+        const tasks = showMine
+          ? allTasks.filter((t: any) => t.assigned_to === user!.id)
+          : allTasks
 
         return (
           <div key={vehicle.id} className="bg-white rounded-xl border border-slate-200 overflow-hidden">

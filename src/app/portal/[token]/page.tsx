@@ -1,10 +1,10 @@
 import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import type { BuildStatus } from '@/types/database'
 
 /**
  * Customer portal — public, no login required.
- * Accessed via unique token link sent to the customer.
+ * Uses admin client so RLS doesn't block unauthenticated reads.
  */
 
 const STAGE_LABELS: Record<BuildStatus, string> = {
@@ -31,7 +31,7 @@ export default async function CustomerPortalPage({
   params: Promise<{ token: string }>
 }) {
   const { token } = await params
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   // Resolve token → customer → vehicle
   const { data: customer } = await supabase

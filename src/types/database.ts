@@ -40,6 +40,7 @@ export interface Vehicle {
   build_status: BuildStatus
   estimated_completion_date: string | null
   handover_date: string | null
+  notes: string | null
   created_by: string | null
   created_at: string
   updated_at: string
@@ -141,6 +142,15 @@ export interface ActivityLog {
   created_at: string
 }
 
+export interface InvoiceItem {
+  id: string
+  invoice_id: string
+  description: string
+  quantity: number
+  unit_price: number
+  created_at: string
+}
+
 export interface BuildLog {
   id: string
   name: string
@@ -170,6 +180,7 @@ export type Database = {
       photos:         { Row: Photo;         Insert: Omit<Photo, 'id' | 'uploaded_at'>; Update: Partial<Photo> }
       activity_log:   { Row: ActivityLog;   Insert: Omit<ActivityLog, 'id' | 'created_at'>; Update: never }
       build_logs:     { Row: BuildLog;      Insert: Omit<BuildLog, 'id' | 'created_at' | 'updated_at'>; Update: Partial<BuildLog> }
+      invoice_items:  { Row: InvoiceItem;   Insert: Omit<InvoiceItem, 'id' | 'created_at'>; Update: Partial<InvoiceItem> }
     }
     Enums: {
       user_role:        UserRole

@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { emailAllTasksComplete } from '@/lib/email'
 
 export async function completeTask(taskId: string, vehicleToken: string) {
   const admin = createAdminClient()
@@ -78,6 +79,31 @@ export async function updateTask(formData: FormData) {
       old_value:  null,
       new_value:  { status },
     })
+
+    // Check if ALL tasks for this vehicle are now complete → email ops
+    const { data: allTasks } = await supabase
+      .from('tasks')
+      .select('status')
+      .eq('vehicle_id', vehicleId)
+
+    const allDone = allTasks && allTasks.length > 0 && allTasks.every(t => t.status === 'completed')
+    if (allDone) {
+      const { data: vehicle } = await supabase
+        .from('vehicles')
+        .select('job_id, vehicle_year, vehicle_make, vehicle_model')
+        .eq('id', vehicleId)
+        .single()
+      if (vehicle) {
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://axiom-build-system.vercel.app'
+        await emailAllTasksComplete({
+          jobId:        vehicle.job_id,
+          vehicleYear:  vehicle.vehicle_year,
+          vehicleMake:  vehicle.vehicle_make,
+          vehicleModel: vehicle.vehicle_model,
+          jobUrl:       `${baseUrl}/ops/jobs/${vehicleId}`,
+        })
+      }
+    }
   }
 
   revalidatePath(`/ops/jobs/${vehicleId}`)
@@ -126,6 +152,7 @@ export async function addTask(formData: FormData) {
     is_required:    true,
     photo_required: formData.get('photo_required') === 'on',
     assigned_to:    formData.get('assigned_to') as string || null,
+    due_date:       (formData.get('due_date') as string) || null,
     status:         'pending',
   })
 
