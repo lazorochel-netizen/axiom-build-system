@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { addTask } from '@/actions/tasks'
 import { saveJobNotes, updateJobDetails } from '@/actions/jobs'
+import { sendCustomerUpdate } from '@/actions/customer-update'
 import { togglePhotoVisibility } from '@/actions/photos'
 import { assignFitterToJob, removeFitterFromJob } from '@/actions/job-fitters'
 import { uploadDocument, deleteDocument } from '@/actions/documents'
@@ -32,10 +33,10 @@ export default async function JobDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ error?: string }>
+  searchParams: Promise<{ error?: string; sent?: string }>
 }) {
   const { id } = await params
-  const { error } = await searchParams
+  const { error, sent } = await searchParams
   const supabase = await createClient()
 
   // Fetch vehicle + fitters list + job fitters in parallel
@@ -113,6 +114,11 @@ export default async function JobDetailPage({
       {error && (
         <div className="px-4 py-2.5 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
           ⚠ {error}
+        </div>
+      )}
+      {sent && (
+        <div className="px-4 py-2.5 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
+          ✓ Email sent to customer successfully.
         </div>
       )}
 
@@ -526,6 +532,62 @@ export default async function JobDetailPage({
             <SubmitButton label="Upload" pendingLabel="Uploading…" />
           </form>
         </details>
+      </section>
+
+      {/* Send Update to Customer */}
+      <section>
+        <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">Send Update to Customer</h2>
+        <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-4">
+          {customer?.email ? (
+            <>
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-slate-500">Sending to:</span>
+                <span className="font-medium text-slate-900">{customer.name}</span>
+                <span className="text-slate-400">·</span>
+                <span className="text-slate-600">{customer.email}</span>
+              </div>
+
+              <div className="bg-slate-50 rounded-lg px-3 py-2.5 text-sm">
+                <span className="text-slate-500">Current status: </span>
+                <span className={`font-medium px-2 py-0.5 rounded-full text-xs ml-1 ${
+                  vehicle.build_status === 'completed' || vehicle.build_status === 'delivered'
+                    ? 'bg-green-100 text-green-700'
+                    : vehicle.build_status.startsWith('kit_')
+                    ? 'bg-orange-100 text-orange-700'
+                    : vehicle.build_status === 'in_progress'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'bg-slate-100 text-slate-600'
+                }`}>
+                  {vehicle.build_status.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
+                </span>
+              </div>
+
+              <form action={sendCustomerUpdate} className="space-y-3">
+                <input type="hidden" name="vehicle_id" value={id} />
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">
+                    Custom Message <span className="text-slate-400 font-normal">(optional — adds a personal note to the email)</span>
+                  </label>
+                  <textarea
+                    name="custom_message"
+                    rows={3}
+                    placeholder="e.g. Your conversion kit arrived this morning and our team is ready to begin fitting next week. We'll send another update when work starts."
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  />
+                </div>
+                <SubmitButton
+                  label="Send Update to Customer"
+                  pendingLabel="Sending…"
+                  className="bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+                />
+              </form>
+            </>
+          ) : (
+            <p className="text-sm text-slate-400">
+              No email address on file for this customer. Add one in the Job Details section above.
+            </p>
+          )}
+        </div>
       </section>
 
       {/* Activity Log */}

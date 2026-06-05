@@ -233,6 +233,79 @@ export async function emailJobCreated({
   )
 }
 
+// ─── Manual customer update — sent by ops from the job detail page ────────────
+export async function emailManualCustomerUpdate({
+  customerEmail,
+  customerName,
+  jobId,
+  vehicleYear,
+  vehicleMake,
+  vehicleModel,
+  buildStatus,
+  statusLabel,
+  customMessage,
+  portalUrl,
+}: {
+  customerEmail: string
+  customerName: string
+  jobId: string
+  vehicleYear: number | null
+  vehicleMake: string
+  vehicleModel: string
+  buildStatus: string
+  statusLabel: string
+  customMessage: string | null
+  portalUrl: string
+}) {
+  const vehicle = `${vehicleYear ?? ''} ${vehicleMake} ${vehicleModel}`.trim()
+
+  // Status badge colour
+  const statusColour =
+    buildStatus === 'completed' || buildStatus === 'delivered' ? '#166534' :
+    buildStatus.startsWith('kit_') ? '#92400e' :
+    buildStatus === 'in_progress' ? '#1e40af' : '#374151'
+
+  await send(
+    customerEmail,
+    `Build update for your ${vehicle} — ${jobId}`,
+    baseTemplate(`
+      <p style="font-size:16px;font-weight:600;margin:0 0 4px">Hi ${customerName},</p>
+      <p style="font-size:14px;color:#6b7280;margin:0 0 20px">Here's the latest update on your vehicle build.</p>
+
+      <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
+        <tr><td style="padding:8px 12px;background:#fff;border:1px solid #e5e7eb;font-size:13px;color:#6b7280;width:130px">Vehicle</td>
+            <td style="padding:8px 12px;background:#fff;border:1px solid #e5e7eb;font-size:13px;font-weight:600">${vehicle}</td></tr>
+        <tr><td style="padding:8px 12px;background:#f9fafb;border:1px solid #e5e7eb;font-size:13px;color:#6b7280">Job</td>
+            <td style="padding:8px 12px;background:#f9fafb;border:1px solid #e5e7eb;font-size:13px">${jobId}</td></tr>
+        <tr><td style="padding:8px 12px;background:#fff;border:1px solid #e5e7eb;font-size:13px;color:#6b7280">Current Status</td>
+            <td style="padding:8px 12px;background:#fff;border:1px solid #e5e7eb;font-size:13px;font-weight:700;color:${statusColour}">${statusLabel}</td></tr>
+      </table>
+
+      ${customMessage ? `
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:14px 16px;margin-bottom:20px">
+        <p style="margin:0 0 6px;font-size:12px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em">Message from Axiom</p>
+        <p style="margin:0;font-size:14px;color:#111827;white-space:pre-line">${customMessage}</p>
+      </div>` : ''}
+
+      <p style="font-size:13px;color:#6b7280;margin:0 0 16px">
+        You can view your full build progress, photos, and status updates anytime on your personal portal:
+      </p>
+
+      <a href="${portalUrl}"
+        style="display:inline-block;background:#1e40af;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600">
+        View Your Build Progress →
+      </a>
+
+      <p style="font-size:12px;color:#9ca3af;margin-top:20px">
+        Questions? Contact us at
+        <a href="tel:${process.env.NEXT_PUBLIC_WORKSHOP_PHONE ?? ''}" style="color:#1e40af">
+          ${process.env.NEXT_PUBLIC_WORKSHOP_PHONE ?? 'our workshop'}
+        </a>
+      </p>
+    `)
+  )
+}
+
 // ─── Notification: Kit status updated by manufacturer ─────────────────────────
 export async function emailKitStatusChanged({
   jobId,
