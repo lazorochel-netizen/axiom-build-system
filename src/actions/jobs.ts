@@ -175,6 +175,46 @@ export async function saveJobNotes(formData: FormData) {
   revalidatePath(`/ops/jobs/${vehicleId}`)
 }
 
+export async function updateJobDetails(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const vehicleId  = formData.get('vehicle_id') as string
+  const customerId = formData.get('customer_id') as string
+
+  // Update vehicle fields
+  await supabase.from('vehicles').update({
+    vehicle_make:              formData.get('vehicle_make') as string,
+    vehicle_model:             formData.get('vehicle_model') as string,
+    vehicle_year:              Number(formData.get('vehicle_year')) || null,
+    vin:                       (formData.get('vin') as string) || null,
+    stock_number:              (formData.get('stock_number') as string) || null,
+    registration:              (formData.get('registration') as string) || null,
+    build_type:                formData.get('build_type') as string,
+    estimated_completion_date: (formData.get('estimated_completion_date') as string) || null,
+  }).eq('id', vehicleId)
+
+  // Update customer fields
+  if (customerId) {
+    await supabase.from('customers').update({
+      name:  formData.get('customer_name') as string,
+      email: (formData.get('customer_email') as string) || null,
+      phone: (formData.get('customer_phone') as string) || null,
+    }).eq('id', customerId)
+  }
+
+  await supabase.from('activity_log').insert({
+    vehicle_id: vehicleId,
+    user_id:    user.id,
+    action:     'job_details_updated',
+    old_value:  null,
+    new_value:  { updated_by: user.id },
+  })
+
+  revalidatePath(`/ops/jobs/${vehicleId}`)
+}
+
 export async function deleteJob(formData: FormData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

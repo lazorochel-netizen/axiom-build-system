@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { addTask } from '@/actions/tasks'
-import { saveJobNotes } from '@/actions/jobs'
+import { saveJobNotes, updateJobDetails } from '@/actions/jobs'
 import { togglePhotoVisibility } from '@/actions/photos'
 import { assignFitterToJob, removeFitterFromJob } from '@/actions/job-fitters'
 import { uploadDocument, deleteDocument } from '@/actions/documents'
@@ -139,23 +139,69 @@ export default async function JobDetailPage({
         </div>
       </div>
 
-      {/* Details */}
-      <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
-        {([
-          ['Customer',       customer?.name ?? '—'],
-          ['Email',          customer?.email ?? '—'],
-          ['Phone',          customer?.phone ?? '—'],
-          ['VIN',            vehicle.vin ?? '—'],
-          ['Stock No.',      vehicle.stock_number ?? '—'],
-          ['Registration',   vehicle.registration ?? '—'],
-          ['Est. Completion',vehicle.estimated_completion_date ?? '—'],
-        ] as [string, string][]).map(([label, value]) => (
-          <div key={label} className="flex px-4 py-3 text-sm">
-            <span className="w-36 text-slate-500 shrink-0">{label}</span>
-            <span className="text-slate-900">{value}</span>
+      {/* Details — editable */}
+      <details className="bg-white rounded-xl border border-slate-200 overflow-hidden" open>
+        <summary className="px-4 py-3.5 text-sm font-medium text-slate-700 cursor-pointer hover:bg-slate-50 select-none flex items-center justify-between">
+          <span>Job Details</span>
+          <span className="text-xs text-slate-400">Click to collapse</span>
+        </summary>
+        <form action={updateJobDetails} className="border-t border-slate-100 divide-y divide-slate-100">
+          <input type="hidden" name="vehicle_id" value={id} />
+          <input type="hidden" name="customer_id" value={customer ? (vehicle.customer_id ?? '') : ''} />
+
+          {/* Customer */}
+          <div className="px-4 py-3 grid grid-cols-[140px_1fr] gap-3 items-center">
+            <label className="text-sm text-slate-500">Customer</label>
+            <input name="customer_name" defaultValue={customer?.name ?? ''} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full" />
           </div>
-        ))}
-      </div>
+          <div className="px-4 py-3 grid grid-cols-[140px_1fr] gap-3 items-center">
+            <label className="text-sm text-slate-500">Email</label>
+            <input name="customer_email" type="email" defaultValue={customer?.email ?? ''} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full" />
+          </div>
+          <div className="px-4 py-3 grid grid-cols-[140px_1fr] gap-3 items-center">
+            <label className="text-sm text-slate-500">Phone</label>
+            <input name="customer_phone" defaultValue={customer?.phone ?? ''} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full" />
+          </div>
+
+          {/* Vehicle */}
+          <div className="px-4 py-3 grid grid-cols-[140px_1fr] gap-3 items-center">
+            <label className="text-sm text-slate-500">Make</label>
+            <input name="vehicle_make" defaultValue={vehicle.vehicle_make} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full" />
+          </div>
+          <div className="px-4 py-3 grid grid-cols-[140px_1fr] gap-3 items-center">
+            <label className="text-sm text-slate-500">Model</label>
+            <input name="vehicle_model" defaultValue={vehicle.vehicle_model} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full" />
+          </div>
+          <div className="px-4 py-3 grid grid-cols-[140px_1fr] gap-3 items-center">
+            <label className="text-sm text-slate-500">Year</label>
+            <input name="vehicle_year" type="number" defaultValue={vehicle.vehicle_year ?? ''} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full" />
+          </div>
+          <div className="px-4 py-3 grid grid-cols-[140px_1fr] gap-3 items-center">
+            <label className="text-sm text-slate-500">VIN</label>
+            <input name="vin" defaultValue={vehicle.vin ?? ''} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full" />
+          </div>
+          <div className="px-4 py-3 grid grid-cols-[140px_1fr] gap-3 items-center">
+            <label className="text-sm text-slate-500">Stock No.</label>
+            <input name="stock_number" defaultValue={vehicle.stock_number ?? ''} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full" />
+          </div>
+          <div className="px-4 py-3 grid grid-cols-[140px_1fr] gap-3 items-center">
+            <label className="text-sm text-slate-500">Registration</label>
+            <input name="registration" defaultValue={vehicle.registration ?? ''} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full" />
+          </div>
+          <div className="px-4 py-3 grid grid-cols-[140px_1fr] gap-3 items-center">
+            <label className="text-sm text-slate-500">Build Type</label>
+            <input name="build_type" defaultValue={vehicle.build_type} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full" />
+          </div>
+          <div className="px-4 py-3 grid grid-cols-[140px_1fr] gap-3 items-center">
+            <label className="text-sm text-slate-500">Est. Completion</label>
+            <input name="estimated_completion_date" type="date" defaultValue={vehicle.estimated_completion_date ?? ''} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full" />
+          </div>
+
+          <div className="px-4 py-3">
+            <SubmitButton label="Save Details" pendingLabel="Saving…" />
+          </div>
+        </form>
+      </details>
 
       {/* Assigned Fitters */}
       <section className="bg-white rounded-xl border border-slate-200 p-4">
