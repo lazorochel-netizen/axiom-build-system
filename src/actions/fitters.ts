@@ -91,6 +91,7 @@ export async function createStaff(formData: FormData) {
 }
 
 export async function setFitterPin(formData: FormData) {
+  // Verify caller is ops manager via auth
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -100,7 +101,11 @@ export async function setFitterPin(formData: FormData) {
 
   if (!pin || pin.length !== 4) return
 
-  await supabase.from('users').update({ pin }).eq('id', fitterId)
+  // Use admin client so RLS doesn't block updating another user's row
+  const admin = createAdminClient()
+  const { error } = await (admin.from('users') as any).update({ pin }).eq('id', fitterId)
+  if (error) console.error('[setFitterPin] failed:', error.message)
+
   revalidatePath('/ops/fitters')
 }
 
