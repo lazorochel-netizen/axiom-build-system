@@ -4,18 +4,6 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
-const STATUS_LABELS: Record<string, string> = {
-  pending:                'Build Pending',
-  kit_designing:          'Kit Being Designed',
-  kit_production:         'Kit In Production',
-  kit_dispatched:         'Kit Dispatched',
-  in_progress:            'Build In Progress',
-  waiting_on_parts:       'Waiting for Parts',
-  waiting_on_compliance:  'In Compliance Review',
-  completed:              'Build Complete',
-  delivered:              'Delivered',
-}
-
 export async function sendCustomerUpdate(formData: FormData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -42,23 +30,35 @@ export async function sendCustomerUpdate(formData: FormData) {
     return redirect(`/ops/jobs/${vehicleId}?error=${encodeURIComponent('Customer has no email address on file')}`)
   }
 
-  const baseUrl    = process.env.NEXT_PUBLIC_APP_URL ?? ''
-  const portalUrl  = `${baseUrl}/portal/${customer.portal_token}`
-  const statusLabel = STATUS_LABELS[vehicle.build_status] ?? vehicle.build_status.replace(/_/g, ' ')
+  const baseUrl   = process.env.NEXT_PUBLIC_APP_URL ?? ''
+  const portalUrl = `${baseUrl}/portal/${customer.portal_token}`
 
-  const { emailManualCustomerUpdate } = await import('@/lib/email')
-  await emailManualCustomerUpdate({
-    customerEmail: customer.email,
+  const { buildCustomerUpdateHtml } = await import('@/lib/email-templates')
+  const html = buildCustomerUpdateHtml({
     customerName:  customer.name,
     jobId:         vehicle.job_id,
     vehicleYear:   vehicle.vehicle_year,
     vehicleMake:   vehicle.vehicle_make,
     vehicleModel:  vehicle.vehicle_model,
     buildStatus:   vehicle.build_status,
-    statusLabel,
     customMessage,
     portalUrl,
+    workshopPhone: process.env.NEXT_PUBLIC_WORKSHOP_PHONE,
   })
+
+  // Send via Resend
+  const apiKey = process.env.RESEND_API_KEY
+  if (apiKey) {
+    const { Resend } = await import('resend')
+    const resend = new Resend(apiKey)
+    const FROM = process.env.EMAIL_FROM ?? 'Axiom Builds <builds@axiomgroup.com.au>'
+    await resend.emails.send({
+      from:    FROM,
+      to:      customer.email,
+      subject: `Build update for your ${vehicle.vehicle_make} ${vehicle.vehicle_model} — ${vehicle.job_id}`,
+      html,
+    })
+  }
 
   // Log it
   await supabase.from('activity_log').insert({

@@ -11,6 +11,7 @@ import type { TaskStatus } from '@/types/database'
 import TaskRow from '@/components/TaskRow'
 import DeleteJobButton from '@/components/DeleteJobButton'
 import SubmitButton from '@/components/SubmitButton'
+import PreviewEmailButton from '@/components/PreviewEmailButton'
 
 const TASK_STATUS_COLOURS: Record<string, string> = {
   pending:         'bg-slate-100 text-slate-600',
@@ -562,24 +563,28 @@ export default async function JobDetailPage({
                 </span>
               </div>
 
-              <form action={sendCustomerUpdate} className="space-y-3">
+              <form action={sendCustomerUpdate} className="space-y-3" id="customer-update-form">
                 <input type="hidden" name="vehicle_id" value={id} />
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1">
                     Custom Message <span className="text-slate-400 font-normal">(optional — adds a personal note to the email)</span>
                   </label>
                   <textarea
+                    id="custom-message-input"
                     name="custom_message"
                     rows={3}
                     placeholder="e.g. Your conversion kit arrived this morning and our team is ready to begin fitting next week. We'll send another update when work starts."
                     className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                   />
                 </div>
-                <SubmitButton
-                  label="Send Update to Customer"
-                  pendingLabel="Sending…"
-                  className="bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-                />
+                <div className="flex gap-2">
+                  <SubmitButton
+                    label="Send Update to Customer"
+                    pendingLabel="Sending…"
+                    className="bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+                  />
+                  <PreviewEmailButton previewBaseUrl={`/ops/jobs/${id}/email-preview`} />
+                </div>
               </form>
             </>
           ) : (
