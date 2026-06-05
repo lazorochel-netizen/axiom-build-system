@@ -17,10 +17,16 @@ export async function uploadTaskPhoto(formData: FormData) {
   const fileName = `${vehicleId}/${taskId}/${Date.now()}.${ext}`
   const bytes    = await file.arrayBuffer()
 
-  // Try to identify the uploader from their auth session
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  const uploadedBy = user?.id ?? null
+  // Identify uploader: prefer PIN check-in cookie, fall back to auth session
+  const { getCheckedInFitter } = await import('@/actions/fitter-checkin')
+  const checkedIn = await getCheckedInFitter()
+  let uploadedBy: string | null = checkedIn?.id ?? null
+
+  if (!uploadedBy) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    uploadedBy = user?.id ?? null
+  }
 
   const admin = createAdminClient()
   const { error: uploadError } = await admin.storage

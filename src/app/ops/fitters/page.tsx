@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { createStaff } from '@/actions/fitters'
+import { createStaff, setFitterPin } from '@/actions/fitters'
 
 const ROLE_BADGE: Record<string, string> = {
   operations_manager: 'bg-purple-100 text-purple-700',
@@ -54,15 +54,38 @@ export default async function FittersPage() {
         <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Fitters</h2>
         {fitters.length > 0 ? (
           <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
-            {fitters.map(s => (
-              <div key={s.id} className="flex items-center justify-between px-4 py-3">
+            {fitters.map((s: any) => (
+              <div key={s.id} className="px-4 py-3 space-y-2">
+                <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-slate-900">{s.name}</p>
                   <p className="text-xs text-slate-400">{s.email}</p>
                 </div>
-                <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${ROLE_BADGE[s.role]}`}>
-                  {ROLE_LABEL[s.role]}
-                </span>
+                <div className="flex items-center gap-2">
+                  {s.pin
+                    ? <span className="text-xs bg-green-50 text-green-700 border border-green-100 px-2 py-0.5 rounded-full font-medium">PIN set</span>
+                    : <span className="text-xs bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded-full font-medium">No PIN</span>
+                  }
+                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${ROLE_BADGE[s.role]}`}>
+                    {ROLE_LABEL[s.role]}
+                  </span>
+                </div>
+                </div>
+                {/* Set / update PIN inline */}
+                <form action={setFitterPin} className="flex items-center gap-2">
+                  <input type="hidden" name="fitter_id" value={s.id} />
+                  <input
+                    type="text"
+                    name="pin"
+                    inputMode="numeric"
+                    maxLength={4}
+                    placeholder={s.pin ? '••••  (update PIN)' : 'Set 4-digit PIN'}
+                    className="w-44 rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 tracking-widest"
+                  />
+                  <button type="submit" className="text-xs font-medium px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors">
+                    Save PIN
+                  </button>
+                </form>
               </div>
             ))}
           </div>
@@ -98,7 +121,7 @@ export default async function FittersPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Temporary Password *</label>
               <input
@@ -108,6 +131,17 @@ export default async function FittersPage() {
                 minLength={8}
                 placeholder="Min. 8 characters"
                 className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">4-Digit PIN (fitters)</label>
+              <input
+                name="pin"
+                type="text"
+                inputMode="numeric"
+                maxLength={4}
+                placeholder="e.g. 1234"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 tracking-widest"
               />
             </div>
             <div>

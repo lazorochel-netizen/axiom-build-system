@@ -77,13 +77,30 @@ export async function createStaff(formData: FormData) {
 
   if (authError) throw new Error(`Failed to create account: ${authError.message}`)
 
+  const pin = (formData.get('pin') as string)?.replace(/\D/g, '').slice(0, 4) || null
+
   await (admin.from('users') as any).upsert({
     id: newUser.user.id,
     name,
     email,
     role,
+    ...(pin ? { pin } : {}),
   })
 
+  revalidatePath('/ops/fitters')
+}
+
+export async function setFitterPin(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const fitterId = formData.get('fitter_id') as string
+  const pin      = (formData.get('pin') as string)?.replace(/\D/g, '').slice(0, 4)
+
+  if (!pin || pin.length !== 4) return
+
+  await supabase.from('users').update({ pin }).eq('id', fitterId)
   revalidatePath('/ops/fitters')
 }
 

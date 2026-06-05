@@ -9,10 +9,16 @@ import { emailAllTasksComplete } from '@/lib/email'
 export async function completeTask(taskId: string, vehicleToken: string) {
   const admin = createAdminClient()
 
-  // Try to identify the fitter from their auth session (if logged in)
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  const completedBy = user?.id ?? null
+  // Identify fitter: prefer PIN check-in cookie, fall back to auth session
+  const { getCheckedInFitter } = await import('@/actions/fitter-checkin')
+  const checkedIn = await getCheckedInFitter()
+  let completedBy: string | null = checkedIn?.id ?? null
+
+  if (!completedBy) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    completedBy = user?.id ?? null
+  }
 
   await (admin.from('tasks') as any).update({
     status:       'completed',
