@@ -48,8 +48,7 @@ export default async function JobDetailPage({
         tasks ( * ),
         qr_codes ( token, is_active ),
         photos ( id, image_url, is_customer_visible, uploaded_at ),
-        documents ( id, document_name, document_type, file_url, uploaded_at ),
-        kit_orders ( id, status, manufacturer_notes, updated_at, users(name) )
+        documents ( id, document_name, document_type, file_url, uploaded_at )
       `)
       .eq('id', id)
       .single(),
@@ -64,6 +63,14 @@ export default async function JobDetailPage({
   ])
 
   if (!vehicle) notFound()
+
+  // Fetch kit order separately so a missing table never causes a 404
+  const { data: kitOrderRaw } = await supabase
+    .from('kit_orders' as any)
+    .select('id, status, manufacturer_notes, updated_at, users(name)')
+    .eq('vehicle_id', id)
+    .maybeSingle()
+  const kitOrder = kitOrderRaw as { id: string; status: string; manufacturer_notes: string | null; updated_at: string; users: { name: string } | null } | null
 
   const tasks = (vehicle.tasks ?? []).sort(
     (a: { task_order: number }, b: { task_order: number }) => a.task_order - b.task_order
@@ -373,7 +380,6 @@ export default async function JobDetailPage({
       <section>
         <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">Kit Status</h2>
         {(() => {
-          const kitOrder = (vehicle.kit_orders as any)?.[0] ?? null
           const KIT_COLOURS: Record<string, string> = {
             designing:  'bg-slate-100 text-slate-600',
             production: 'bg-blue-100 text-blue-700',
