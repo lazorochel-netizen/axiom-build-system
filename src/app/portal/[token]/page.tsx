@@ -9,6 +9,9 @@ import type { BuildStatus } from '@/types/database'
 
 const STAGE_LABELS: Record<BuildStatus, string> = {
   pending:               'Build Pending',
+  kit_designing:         'Your Build is Being Designed',
+  kit_production:        'Conversion Kit in Production',
+  kit_dispatched:        'Kit On Its Way',
   in_progress:           'Build In Progress',
   waiting_on_parts:      'Waiting on Parts',
   waiting_on_compliance: 'In Compliance Review',
@@ -17,7 +20,10 @@ const STAGE_LABELS: Record<BuildStatus, string> = {
 }
 
 const STAGE_DESCRIPTIONS: Record<BuildStatus, string> = {
-  pending:               'Your vehicle has been received and is awaiting the build team.',
+  pending:               'Your vehicle has been received and your build is being prepared.',
+  kit_designing:         'Our team is designing your custom conversion kit. We\'ll keep you updated as it progresses.',
+  kit_production:        'Your conversion kit is currently being manufactured. We\'ll notify you when it\'s on its way.',
+  kit_dispatched:        'Your conversion kit has been dispatched and is on its way to our workshop. Fitting will begin shortly.',
   in_progress:           'Your build is underway. We\'ll keep this page updated as work progresses.',
   waiting_on_parts:      'We\'re waiting on parts to arrive before continuing your build.',
   waiting_on_compliance: 'Your vehicle is going through its compliance checks.',

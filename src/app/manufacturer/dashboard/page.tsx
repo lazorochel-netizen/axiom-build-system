@@ -2,22 +2,23 @@ import { createClient } from '@/lib/supabase/server'
 import { updateKitStatus } from '@/actions/kit-orders'
 import type { BuildStatus, KitStatus } from '@/types/database'
 
-const KIT_STATUS_COLOURS: Record<KitStatus, string> = {
-  designing:  'bg-slate-100 text-slate-600',
-  production: 'bg-blue-100 text-blue-700',
-  completed:  'bg-green-100 text-green-700',
-  dispatched: 'bg-purple-100 text-purple-700',
+const KIT_STAGE_COLOURS: Record<string, string> = {
+  pending:        'bg-slate-100 text-slate-600',
+  kit_designing:  'bg-orange-100 text-orange-700',
+  kit_production: 'bg-orange-100 text-orange-700',
+  kit_dispatched: 'bg-yellow-100 text-yellow-700',
 }
 
-const KIT_STATUS_LABELS: Record<KitStatus, string> = {
-  designing:  'Designing',
-  production: 'In Production',
-  completed:  'Kit Completed',
-  dispatched: 'Dispatched',
+const KIT_STAGE_LABELS: Record<string, string> = {
+  pending:        'Not Started',
+  kit_designing:  'Designing',
+  kit_production: 'In Production',
+  kit_dispatched: 'Dispatched',
 }
 
+// Manufacturer sees jobs that are in pre-build / kit stages
 const BUILD_STATUS_ACTIVE: BuildStatus[] = [
-  'pending', 'in_progress', 'waiting_on_parts', 'waiting_on_compliance'
+  'pending', 'kit_designing', 'kit_production', 'kit_dispatched', 'waiting_on_parts'
 ]
 
 export default async function ManufacturerDashboard() {
@@ -51,7 +52,7 @@ export default async function ManufacturerDashboard() {
         <div className="space-y-4">
           {active.map(v => {
             const kit = (v.kit_orders as any)?.[0] ?? null
-            const kitStatus: KitStatus = kit?.status ?? 'designing'
+            const currentStatus = v.build_status
             const isOverdue = v.estimated_completion_date &&
               new Date(v.estimated_completion_date) < new Date()
 
@@ -73,8 +74,8 @@ export default async function ManufacturerDashboard() {
                       </p>
                     )}
                   </div>
-                  <span className={`shrink-0 text-xs font-medium px-2.5 py-1 rounded-full ${KIT_STATUS_COLOURS[kitStatus]}`}>
-                    {KIT_STATUS_LABELS[kitStatus]}
+                  <span className={`shrink-0 text-xs font-medium px-2.5 py-1 rounded-full ${KIT_STAGE_COLOURS[currentStatus] ?? 'bg-slate-100 text-slate-500'}`}>
+                    {KIT_STAGE_LABELS[currentStatus] ?? currentStatus.replace(/_/g, ' ')}
                   </span>
                 </div>
 
@@ -95,7 +96,7 @@ export default async function ManufacturerDashboard() {
                       <label className="block text-xs font-medium text-slate-600 mb-1">Kit Status</label>
                       <select
                         name="status"
-                        defaultValue={kitStatus}
+                        defaultValue={currentStatus === 'pending' ? 'designing' : currentStatus.replace('kit_', '')}
                         className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="designing">Designing</option>

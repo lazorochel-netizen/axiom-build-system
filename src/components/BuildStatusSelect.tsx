@@ -4,20 +4,27 @@ import { useState, useTransition } from 'react'
 import { updateBuildStatus } from '@/actions/jobs'
 
 const STATUSES = [
-  { value: 'pending',               label: 'Pending' },
-  { value: 'in_progress',           label: 'In Progress' },
-  { value: 'waiting_on_parts',      label: 'Waiting for the Kit' },
-  { value: 'completed',             label: 'Completed' },
-  { value: 'delivered',             label: 'Delivered' },
+  { value: 'pending',                label: 'Pending' },
+  { value: 'kit_designing',          label: 'Kit: Designing' },
+  { value: 'kit_production',         label: 'Kit: In Production' },
+  { value: 'kit_dispatched',         label: 'Kit: Dispatched' },
+  { value: 'in_progress',            label: 'In Progress' },
+  { value: 'waiting_on_parts',       label: 'Waiting for Kit' },
+  { value: 'waiting_on_compliance',  label: 'In Compliance' },
+  { value: 'completed',              label: 'Completed' },
+  { value: 'delivered',              label: 'Delivered' },
 ]
 
 const STATUS_COLOURS: Record<string, string> = {
-  pending:              'bg-slate-100 text-slate-600',
-  in_progress:          'bg-blue-100 text-blue-700',
-  waiting_on_parts:     'bg-amber-100 text-amber-700',
-  waiting_on_compliance:'bg-amber-100 text-amber-700',
-  completed:            'bg-green-100 text-green-700',
-  delivered:            'bg-slate-200 text-slate-500',
+  pending:               'bg-slate-100 text-slate-600',
+  kit_designing:         'bg-orange-100 text-orange-700',
+  kit_production:        'bg-orange-100 text-orange-700',
+  kit_dispatched:        'bg-yellow-100 text-yellow-700',
+  in_progress:           'bg-blue-100 text-blue-700',
+  waiting_on_parts:      'bg-amber-100 text-amber-700',
+  waiting_on_compliance: 'bg-purple-100 text-purple-700',
+  completed:             'bg-green-100 text-green-700',
+  delivered:             'bg-slate-200 text-slate-500',
 }
 
 export default function BuildStatusSelect({

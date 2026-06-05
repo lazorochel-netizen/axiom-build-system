@@ -5,7 +5,7 @@
 
 export type UserRole = 'operations_manager' | 'fitter' | 'manufacturer'
 export type KitStatus = 'designing' | 'production' | 'completed' | 'dispatched'
-export type BuildStatus = 'pending' | 'in_progress' | 'waiting_on_parts' | 'waiting_on_compliance' | 'completed' | 'delivered'
+export type BuildStatus = 'pending' | 'kit_designing' | 'kit_production' | 'kit_dispatched' | 'in_progress' | 'waiting_on_parts' | 'waiting_on_compliance' | 'completed' | 'delivered'
 export type TaskStatus = 'pending' | 'in_progress' | 'completed'
 export type QuotationStatus = 'draft' | 'sent' | 'accepted' | 'declined'
 export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'overdue'

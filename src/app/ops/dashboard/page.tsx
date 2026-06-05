@@ -5,6 +5,9 @@ const DONE_PAGE_SIZE = 10
 
 const STATUS_LABELS: Record<BuildStatus, string> = {
   pending:                'Pending',
+  kit_designing:          'Kit: Designing',
+  kit_production:         'Kit: In Production',
+  kit_dispatched:         'Kit: Dispatched',
   in_progress:            'In Progress',
   waiting_on_parts:       'Waiting for Kit',
   waiting_on_compliance:  'In Compliance',
@@ -14,11 +17,15 @@ const STATUS_LABELS: Record<BuildStatus, string> = {
 
 // All statuses shown as summary tiles on the dashboard
 const DASHBOARD_STATUSES: BuildStatus[] = [
-  'pending', 'in_progress', 'waiting_on_parts', 'waiting_on_compliance', 'completed', 'delivered'
+  'pending', 'kit_designing', 'kit_production', 'kit_dispatched',
+  'in_progress', 'waiting_on_compliance', 'completed', 'delivered'
 ]
 
 const STATUS_COLOURS: Record<BuildStatus, string> = {
   pending:                'bg-slate-100 text-slate-600',
+  kit_designing:          'bg-orange-100 text-orange-700',
+  kit_production:         'bg-orange-100 text-orange-700',
+  kit_dispatched:         'bg-yellow-100 text-yellow-700',
   in_progress:            'bg-blue-100 text-blue-700',
   waiting_on_parts:       'bg-amber-100 text-amber-700',
   waiting_on_compliance:  'bg-purple-100 text-purple-700',
