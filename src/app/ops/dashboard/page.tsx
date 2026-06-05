@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import type { BuildStatus } from '@/types/database'
+import Link from 'next/link'
 
 const DONE_PAGE_SIZE = 10
 
@@ -66,12 +67,12 @@ export default async function OpsDashboard({
     <div className="space-y-6 max-w-5xl">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold text-slate-900">Dashboard</h1>
-        <a
+        <Link
           href="/ops/jobs/new"
           className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
         >
           + New Job
-        </a>
+        </Link>
       </div>
 
       {/* Summary pills */}
@@ -101,9 +102,10 @@ export default async function OpsDashboard({
                 new Date(v.estimated_completion_date) < new Date() &&
                 !['completed', 'delivered'].includes(v.build_status)
               return (
-              <a
+              <Link
                 key={v.id}
                 href={`/ops/jobs/${v.id}`}
+                prefetch={true}
                 className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 transition-colors"
               >
                 <div>
@@ -116,7 +118,7 @@ export default async function OpsDashboard({
                 <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_COLOURS[v.build_status as BuildStatus]}`}>
                   {STATUS_LABELS[v.build_status as BuildStatus]}
                 </span>
-              </a>
+              </Link>
             )})}
           </div>
         )}
@@ -133,9 +135,10 @@ export default async function OpsDashboard({
           </div>
           <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
             {done!.map(v => (
-              <a
+              <Link
                 key={v.id}
                 href={`/ops/jobs/${v.id}`}
+                prefetch={true}
                 className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 transition-colors"
               >
                 <div>
@@ -147,7 +150,7 @@ export default async function OpsDashboard({
                 <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_COLOURS[v.build_status as BuildStatus]}`}>
                   {STATUS_LABELS[v.build_status as BuildStatus]}
                 </span>
-              </a>
+              </Link>
             ))}
           </div>
           {/* Pagination */}

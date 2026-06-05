@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import type { BuildStatus } from '@/types/database'
 import SortSelect from '@/components/SortSelect'
+import Link from 'next/link'
 
 const STATUS_COLOURS: Record<BuildStatus, string> = {
   pending:                'bg-slate-100 text-slate-600',
@@ -109,12 +110,12 @@ export default async function JobsPage({
     <div className="max-w-4xl space-y-5">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold text-slate-900">All Jobs</h1>
-        <a
+        <Link
           href="/ops/jobs/new"
           className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
         >
           + New Job
-        </a>
+        </Link>
       </div>
 
       {/* Status Filters */}
@@ -166,9 +167,10 @@ export default async function JobsPage({
               new Date(v.estimated_completion_date) < new Date() &&
               !['completed', 'delivered'].includes(v.build_status)
             return (
-              <a
+              <Link
                 key={v.id}
                 href={`/ops/jobs/${v.id}`}
+                prefetch={true}
                 className="flex items-center justify-between px-4 py-3.5 hover:bg-slate-50 transition-colors"
               >
                 <div className="min-w-0">
@@ -191,7 +193,7 @@ export default async function JobsPage({
                 <span className={`ml-4 shrink-0 text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_COLOURS[v.build_status as BuildStatus]}`}>
                   {STATUS_LABELS[v.build_status as BuildStatus]}
                 </span>
-              </a>
+              </Link>
             )
           })}
         </div>

@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import Link from 'next/link'
 
 export default async function OpsLayout({
   children,
@@ -59,11 +60,12 @@ export default async function OpsLayout({
 
 function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <a
+    <Link
       href={href}
+      prefetch={true}
       className="px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
     >
       {children}
-    </a>
+    </Link>
   )
 }
