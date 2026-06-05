@@ -97,15 +97,33 @@ export async function setFitterPin(formData: FormData) {
   if (!user) redirect('/login')
 
   const fitterId = formData.get('fitter_id') as string
-  const pin      = (formData.get('pin') as string)?.replace(/\D/g, '').slice(0, 4)
+  const rawPin   = formData.get('pin') as string
+  const pin      = rawPin?.replace(/\D/g, '').slice(0, 4)
 
-  if (!pin || pin.length !== 4) return
+  if (!fitterId) redirect('/ops/fitters?pin_error=no_fitter')
+  if (!pin || pin.length !== 4) redirect('/ops/fitters?pin_error=invalid_pin')
 
-  // Use admin client so RLS doesn't block updating another user's row
-  const admin = createAdminClient()
-  const { error } = await (admin.from('users') as any).update({ pin }).eq('id', fitterId)
-  if (error) console.error('[setFitterPin] failed:', error.message)
+  // Use createClient (untyped) with service role key directly — bypasses all type constraints
+  const { createClient: createRawClient } = await import('@supabase/supabase-js')
+  const adminRaw = createRawClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  )
 
+  const { data, error } = await adminRaw
+    .from('users')
+    .update({ pin })
+    .eq('id', fitterId)
+    .select('id, name, pin')
+    .single()
+
+  if (error) {
+    console.error('[setFitterPin] error:', error.message, error.code)
+    redirect(`/ops/fitters?pin_error=${encodeURIComponent(error.message)}`)
+  }
+
+  console.log('[setFitterPin] saved PIN for', data?.name)
   revalidatePath('/ops/fitters')
 }
 

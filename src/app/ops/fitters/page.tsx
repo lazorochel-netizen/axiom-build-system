@@ -11,7 +11,12 @@ const ROLE_LABEL: Record<string, string> = {
   fitter:             'Fitter',
 }
 
-export default async function FittersPage() {
+export default async function FittersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ pin_error?: string }>
+}) {
+  const { pin_error } = await searchParams
   const supabase = await createClient()
 
   const { data: staff } = await supabase
@@ -26,6 +31,12 @@ export default async function FittersPage() {
   return (
     <div className="max-w-2xl space-y-8">
       <h1 className="text-xl font-semibold text-slate-900">Staff</h1>
+
+      {pin_error && (
+        <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+          ⚠ PIN save failed: {decodeURIComponent(pin_error)}
+        </div>
+      )}
 
       {/* Ops Managers */}
       <section className="space-y-3">
