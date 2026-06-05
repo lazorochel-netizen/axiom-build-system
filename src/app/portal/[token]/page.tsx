@@ -53,7 +53,8 @@ export default async function CustomerPortalPage({
     .select(`
       id, job_id, vehicle_make, vehicle_model, vehicle_year,
       build_status, estimated_completion_date,
-      photos ( id, image_url, is_customer_visible, uploaded_at )
+      photos ( id, image_url, is_customer_visible, uploaded_at ),
+      tasks ( id, task_name, task_category, task_order, status )
     `)
     .eq('customer_id', customer.id)
     .order('created_at', { ascending: false })
@@ -111,6 +112,79 @@ export default async function CustomerPortalPage({
                   </p>
                 )}
               </div>
+
+              {/* Build Progress — task checklist */}
+              {(() => {
+                const tasks = ((vehicle.tasks ?? []) as { id: string; task_name: string; task_category: string; task_order: number; status: string }[])
+                  .sort((a, b) => a.task_order - b.task_order)
+                if (tasks.length === 0) return null
+                const done  = tasks.filter(t => t.status === 'completed').length
+                const total = tasks.length
+                const byCategory = tasks.reduce((acc, t) => {
+                  if (!acc[t.task_category]) acc[t.task_category] = []
+                  acc[t.task_category].push(t)
+                  return acc
+                }, {} as Record<string, typeof tasks>)
+
+                return (
+                  <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                    <div className="px-4 py-3 border-b border-slate-100">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-sm font-medium text-slate-900">Build progress</p>
+                        <p className="text-xs text-slate-400">{done} / {total} tasks</p>
+                      </div>
+                      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-blue-500 rounded-full transition-all" style={{ width: `${Math.round((done / total) * 100)}%` }} />
+                      </div>
+                    </div>
+
+                    {Object.entries(byCategory).map(([category, categoryTasks], ci, arr) => (
+                      <div key={category} className={ci < arr.length - 1 ? 'border-b border-slate-100' : ''}>
+                        <p className="px-4 pt-3 pb-1 text-xs font-medium text-slate-400 uppercase tracking-wide">{category}</p>
+                        <div className="px-4 pb-3 space-y-2">
+                          {categoryTasks.map((task: { id: string; task_name: string; status: string }) => {
+                            const isDone   = task.status === 'completed'
+                            const isActive = task.status === 'in_progress'
+                            return (
+                              <div key={task.id} className="flex items-center gap-3">
+                                {isDone ? (
+                                  <div className="w-4 h-4 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+                                    <svg className="w-2.5 h-2.5 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                  </div>
+                                ) : isActive ? (
+                                  <div className="w-4 h-4 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+                                  </div>
+                                ) : (
+                                  <div className="w-4 h-4 rounded-full border border-slate-200 bg-slate-50 shrink-0" />
+                                )}
+                                <p className={`text-sm ${isDone ? 'line-through text-slate-400' : 'text-slate-700'}`}>
+                                  {task.task_name}
+                                </p>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    ))}
+
+                    <div className="px-4 py-2.5 border-t border-slate-100 flex gap-4">
+                      {[
+                        { colour: 'bg-green-100 border-green-300', label: 'Done' },
+                        { colour: 'bg-blue-100 border-blue-300', label: 'In progress' },
+                        { colour: 'bg-slate-50 border-slate-200', label: 'Upcoming' },
+                      ].map(({ colour, label }) => (
+                        <div key={label} className="flex items-center gap-1.5">
+                          <div className={`w-2.5 h-2.5 rounded-full border ${colour}`} />
+                          <span className="text-xs text-slate-400">{label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })()}
 
               {/* Approved Photos */}
               {approvedPhotos.length > 0 && (
