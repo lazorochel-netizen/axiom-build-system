@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import type { BuildStatus } from '@/types/database'
+import SortSelect from '@/components/SortSelect'
 
 const STATUS_COLOURS: Record<BuildStatus, string> = {
   pending:                'bg-slate-100 text-slate-600',
@@ -19,12 +20,33 @@ const STATUS_LABELS: Record<BuildStatus, string> = {
   delivered:              'Delivered',
 }
 
+type SortKey = 'newest' | 'oldest' | 'due_asc' | 'due_desc' | 'status'
+
+const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: 'newest',   label: 'Newest first' },
+  { value: 'oldest',   label: 'Oldest first' },
+  { value: 'due_asc',  label: 'Due date ↑' },
+  { value: 'due_desc', label: 'Due date ↓' },
+  { value: 'status',   label: 'By status' },
+]
+
+function buildSortQuery(query: any, sort: SortKey) {
+  switch (sort) {
+    case 'oldest':   return query.order('created_at', { ascending: true })
+    case 'due_asc':  return query.order('estimated_completion_date', { ascending: true,  nullsFirst: false })
+    case 'due_desc': return query.order('estimated_completion_date', { ascending: false, nullsFirst: false })
+    case 'status':   return query.order('build_status', { ascending: true }).order('created_at', { ascending: false })
+    default:         return query.order('created_at', { ascending: false })
+  }
+}
+
 export default async function JobsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; q?: string }>
+  searchParams: Promise<{ status?: string; q?: string; sort?: string }>
 }) {
-  const { status, q } = await searchParams
+  const { status, q, sort: sortParam } = await searchParams
+  const sort = (SORT_OPTIONS.find(o => o.value === sortParam)?.value ?? 'newest') as SortKey
   const supabase = await createClient()
 
   let query = supabase
@@ -34,7 +56,6 @@ export default async function JobsPage({
       build_type, build_status, estimated_completion_date,
       customers ( name )
     `)
-    .order('created_at', { ascending: false })
 
   if (status && status !== 'all') {
     query = query.eq('build_status', status as BuildStatus)
@@ -45,6 +66,8 @@ export default async function JobsPage({
       `job_id.ilike.%${q}%,vehicle_make.ilike.%${q}%,vehicle_model.ilike.%${q}%`
     )
   }
+
+  query = buildSortQuery(query, sort)
 
   const { data: vehicles } = await query
   const filtered = vehicles ?? []
@@ -58,6 +81,20 @@ export default async function JobsPage({
     { value: 'delivered',        label: 'Delivered' },
   ]
 
+  // Build URL helper that preserves all active params
+  function url(overrides: Record<string, string>) {
+    const params = new URLSearchParams()
+    if (status && status !== 'all') params.set('status', status)
+    if (q) params.set('q', q)
+    if (sort !== 'newest') params.set('sort', sort)
+    Object.entries(overrides).forEach(([k, v]) => {
+      if (v) params.set(k, v)
+      else params.delete(k)
+    })
+    const str = params.toString()
+    return `/ops/jobs${str ? `?${str}` : ''}`
+  }
+
   return (
     <div className="max-w-4xl space-y-5">
       <div className="flex items-center justify-between">
@@ -70,12 +107,12 @@ export default async function JobsPage({
         </a>
       </div>
 
-      {/* Filters */}
+      {/* Status Filters */}
       <div className="flex flex-wrap gap-2">
         {statuses.map(s => (
           <a
             key={s.value}
-            href={`/ops/jobs?status=${s.value}${q ? `&q=${q}` : ''}`}
+            href={url({ status: s.value === 'all' ? '' : s.value })}
             className={`text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
               (status ?? 'all') === s.value
                 ? 'bg-slate-900 text-white border-slate-900'
@@ -87,17 +124,26 @@ export default async function JobsPage({
         ))}
       </div>
 
-      {/* Search */}
-      <form method="get" action="/ops/jobs">
-        {status && <input type="hidden" name="status" value={status} />}
-        <input
-          type="text"
-          name="q"
-          defaultValue={q}
-          placeholder="Search by job ID, vehicle, or customer…"
-          className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      {/* Search + Sort row */}
+      <div className="flex gap-2 items-center">
+        <form method="get" action="/ops/jobs" className="flex-1">
+          {status && status !== 'all' && <input type="hidden" name="status" value={status} />}
+          {sort !== 'newest' && <input type="hidden" name="sort" value={sort} />}
+          <input
+            type="text"
+            name="q"
+            defaultValue={q}
+            placeholder="Search by job ID, vehicle, or customer…"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </form>
+
+        <SortSelect
+          value={sort}
+          options={SORT_OPTIONS}
+          baseUrl={url({ sort: '' })}
         />
-      </form>
+      </div>
 
       {/* Jobs Table */}
       {filtered.length === 0 ? (
