@@ -232,3 +232,49 @@ export async function emailJobCreated({
     `)
   )
 }
+
+// ─── Notification: Kit status updated by manufacturer ─────────────────────────
+export async function emailKitStatusChanged({
+  jobId,
+  vehicleYear,
+  vehicleMake,
+  vehicleModel,
+  status,
+  statusLabel,
+  notes,
+  jobUrl,
+}: {
+  jobId: string
+  vehicleYear: number | null
+  vehicleMake: string
+  vehicleModel: string
+  status: string
+  statusLabel: string
+  notes: string | null
+  jobUrl: string
+}) {
+  if (!OPS) return
+  const vehicle = `${vehicleYear ?? ''} ${vehicleMake} ${vehicleModel}`.trim()
+  const statusColour = status === 'dispatched' ? '#166534' : status === 'completed' ? '#1e40af' : '#92400e'
+
+  await send(
+    OPS,
+    `Kit update: ${statusLabel} — ${jobId}`,
+    baseTemplate(`
+      <p style="font-size:16px;font-weight:600;margin:0 0 12px">Kit status updated</p>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
+        <tr><td style="padding:8px 12px;background:#fff;border:1px solid #e5e7eb;font-size:13px;color:#6b7280;width:120px">Job</td>
+            <td style="padding:8px 12px;background:#fff;border:1px solid #e5e7eb;font-size:13px;font-weight:600">${jobId}</td></tr>
+        <tr><td style="padding:8px 12px;background:#f9fafb;border:1px solid #e5e7eb;font-size:13px;color:#6b7280">Vehicle</td>
+            <td style="padding:8px 12px;background:#f9fafb;border:1px solid #e5e7eb;font-size:13px">${vehicle}</td></tr>
+        <tr><td style="padding:8px 12px;background:#fff;border:1px solid #e5e7eb;font-size:13px;color:#6b7280">Kit Status</td>
+            <td style="padding:8px 12px;background:#fff;border:1px solid #e5e7eb;font-size:13px;font-weight:700;color:${statusColour}">${statusLabel}</td></tr>
+        ${notes ? `<tr><td style="padding:8px 12px;background:#f9fafb;border:1px solid #e5e7eb;font-size:13px;color:#6b7280;vertical-align:top">Notes</td>
+            <td style="padding:8px 12px;background:#f9fafb;border:1px solid #e5e7eb;font-size:13px">${notes}</td></tr>` : ''}
+      </table>
+      <a href="${jobUrl}" style="display:inline-block;background:#1e40af;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-size:14px;font-weight:600">
+        View Job →
+      </a>
+    `)
+  )
+}

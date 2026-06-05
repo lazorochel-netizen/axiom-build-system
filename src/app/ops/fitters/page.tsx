@@ -4,11 +4,13 @@ import { createStaff, setFitterPin } from '@/actions/fitters'
 const ROLE_BADGE: Record<string, string> = {
   operations_manager: 'bg-purple-100 text-purple-700',
   fitter:             'bg-cyan-100 text-cyan-700',
+  manufacturer:       'bg-orange-100 text-orange-700',
 }
 
 const ROLE_LABEL: Record<string, string> = {
   operations_manager: 'Ops Manager',
   fitter:             'Fitter',
+  manufacturer:       'Manufacturer',
 }
 
 export default async function FittersPage({
@@ -164,6 +166,7 @@ export default async function FittersPage({
               >
                 <option value="fitter">Fitter</option>
                 <option value="operations_manager">Operations Manager</option>
+                <option value="manufacturer">Manufacturer</option>
               </select>
             </div>
           </div>
