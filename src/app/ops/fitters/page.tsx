@@ -16,7 +16,7 @@ export default async function FittersPage() {
 
   const { data: staff } = await supabase
     .from('users')
-    .select('id, name, email, role, created_at')
+    .select('id, name, email, role, pin, created_at')
     .order('role')
     .order('name')
 
