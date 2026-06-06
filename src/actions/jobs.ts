@@ -222,4 +222,13 @@ export async function deleteJob(formData: FormData) {
   // Delete in order: tasks, qr_codes, photos, vehicle (customer kept)
   await (supabase.from('tasks') as any).delete().eq('vehicle_id', vehicleId)
   await (supabase.from('qr_codes') as any).delete().eq('vehicle_id', vehicleId)
-  await
+  await (supabase.from('photos') as any).delete().eq('vehicle_id', vehicleId)
+  await (supabase.from('vehicles') as any).delete().eq('id', vehicleId)
+
+  redirect('/ops/jobs')
+}
+ (supabase.from('photos') as any).delete().eq('vehicle_id', vehicleId)
+  await (supabase.from('vehicles') as any).delete().eq('id', vehicleId)
+
+  redirect('/ops/dashboard')
+}
