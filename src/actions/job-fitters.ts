@@ -17,8 +17,8 @@ export async function assignFitterToJob(formData: FormData) {
 
   // Send assignment email to fitter
   const [{ data: fitter }, { data: vehicle }] = await Promise.all([
-    supabase.from('users').select('name, email').eq('id', userId).single(),
-    supabase.from('vehicles').select('job_id, vehicle_year, vehicle_make, vehicle_model, build_type').eq('id', vehicleId).single(),
+    (supabase.from('users') as any).select('name, email').eq('id', userId).single() as Promise<{ data: { name: string; email: string | null } | null }>,
+    (supabase.from('vehicles') as any).select('job_id, vehicle_year, vehicle_make, vehicle_model, build_type').eq('id', vehicleId).single() as Promise<{ data: { job_id: string; vehicle_year: number | null; vehicle_make: string; vehicle_model: string; build_type: string } | null }>,
   ])
 
   if (fitter?.email && vehicle) {
