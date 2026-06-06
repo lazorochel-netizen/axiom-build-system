@@ -14,15 +14,14 @@ export default async function PrintQRPage({
   const { id } = await params
   const supabase = await createClient()
 
-  const { data: vehicle } = await supabase
-    .from('vehicles')
+  const { data: vehicle } = await (supabase.from('vehicles') as any)
     .select('job_id, vehicle_make, vehicle_model, vehicle_year, build_type, qr_codes(token, is_active)')
     .eq('id', id)
-    .single()
+    .single() as { data: { job_id: string; vehicle_make: string; vehicle_model: string; vehicle_year: number | null; build_type: string; qr_codes: { token: string; is_active: boolean }[] } | null }
 
   if (!vehicle) notFound()
 
-  const activeQR = (vehicle.qr_codes as { token: string; is_active: boolean }[])
+  const activeQR = vehicle.qr_codes
     ?.find(q => q.is_active)
 
   if (!activeQR) {
