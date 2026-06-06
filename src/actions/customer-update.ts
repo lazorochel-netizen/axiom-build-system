@@ -68,7 +68,7 @@ export async function sendCustomerUpdate(formData: FormData) {
   }
 
   // Log it
-  await supabase.from('activity_log').insert({
+  await (supabase.from('activity_log') as any).insert({
     vehicle_id: vehicleId,
     user_id:    user.id,
     action:     'customer_email_sent',

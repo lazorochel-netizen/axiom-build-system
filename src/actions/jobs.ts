@@ -55,7 +55,7 @@ export async function createJob(formData: FormData) {
     .insert({ vehicle_id: vehicle.id, generated_by: user.id, is_active: true })
 
   // 3b. Log job creation + send ops email
-  await supabase.from('activity_log').insert({
+  await (supabase.from('activity_log') as any).insert({
     vehicle_id: vehicle.id,
     user_id:    user.id,
     action:     'job_created',
@@ -119,7 +119,7 @@ export async function updateBuildStatus(formData: FormData) {
   }).eq('id', vehicleId)
 
   // Log status change
-  await supabase.from('activity_log').insert({
+  await (supabase.from('activity_log') as any).insert({
     vehicle_id: vehicleId,
     user_id:    user.id,
     action:     'status_changed',
@@ -164,7 +164,7 @@ export async function saveJobNotes(formData: FormData) {
 
   await supabase.from('vehicles').update({ notes }).eq('id', vehicleId)
 
-  await supabase.from('activity_log').insert({
+  await (supabase.from('activity_log') as any).insert({
     vehicle_id: vehicleId,
     user_id:    user.id,
     action:     'notes_saved',
@@ -204,7 +204,7 @@ export async function updateJobDetails(formData: FormData) {
     }).eq('id', customerId)
   }
 
-  await supabase.from('activity_log').insert({
+  await (supabase.from('activity_log') as any).insert({
     vehicle_id: vehicleId,
     user_id:    user.id,
     action:     'job_details_updated',

@@ -77,7 +77,7 @@ export async function updateTask(formData: FormData) {
   }).eq('id', taskId)
 
   if (status === 'completed') {
-    await supabase.from('activity_log').insert({
+    await (supabase.from('activity_log') as any).insert({
       vehicle_id: vehicleId,
       task_id:    taskId,
       user_id:    user.id,
