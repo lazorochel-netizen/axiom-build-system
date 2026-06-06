@@ -81,4 +81,26 @@ export async function middleware(request: NextRequest) {
 
   // Ops routes — operations_manager only
   if (pathname.startsWith('/ops') && role !== 'operations_manager') {
-    return NextResp
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  // Fitter routes — fitter only
+  if (pathname.startsWith('/fitter') && role !== 'fitter') {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  // Manufacturer routes — manufacturer only
+  if (pathname.startsWith('/manufacturer') && role !== 'manufacturer') {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  return supabaseResponse
+}
+
+export default middleware
+
+export const config = {
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
+}
