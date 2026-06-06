@@ -12,8 +12,7 @@ export default async function FitterDashboard({
   const { data: { user } } = await supabase.auth.getUser()
 
   // Single query — fetch all jobs assigned to this fitter via job_fitters
-  const { data: jobFitters } = await supabase
-    .from('job_fitters')
+  const { data: jobFitters } = await (supabase.from('job_fitters') as any)
     .select(`
       vehicle_id,
       vehicles (
@@ -23,7 +22,7 @@ export default async function FitterDashboard({
         qr_codes ( token, is_active )
       )
     `)
-    .eq('user_id', user!.id)
+    .eq('user_id', user!.id) as { data: { vehicle_id: string; vehicles: any }[] | null }
 
   const vehicles = (jobFitters ?? [])
     .map(jf => jf.vehicles as any)
