@@ -211,10 +211,4 @@ export async function deleteJob(formData: FormData) {
 
   const vehicleId = formData.get('vehicle_id') as string
 
-  await (supabase.from('tasks') as any).delete().eq('vehicle_id', vehicleId)
-  await (supabase.from('qr_codes') as any).delete().eq('vehicle_id', vehicleId)
-  await (supabase.from('photos') as any).delete().eq('vehicle_id', vehicleId)
-  await (supabase.from('vehicles') as any).delete().eq('id', vehicleId)
-
-  redirect('/ops/dashboard')
-}
+  await (supabase.from('tasks') as any).delete().eq(

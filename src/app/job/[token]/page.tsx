@@ -16,28 +16,25 @@ export default async function FitterJobPage({
   const { error }  = await searchParams
   const supabase   = createAdminClient()
 
-  const { data: qr } = await supabase
-    .from('qr_codes')
+  const { data: qr } = await (supabase.from('qr_codes') as any)
     .select('vehicle_id, is_active')
     .eq('token', token)
-    .single()
+    .single() as { data: { vehicle_id: string; is_active: boolean } | null }
 
   if (!qr || !qr.is_active) notFound()
 
   const [{ data: vehicle }, { data: jobFitters }] = await Promise.all([
-    supabase
-      .from('vehicles')
+    (supabase.from('vehicles') as any)
       .select(`
         job_id, vehicle_make, vehicle_model, vehicle_year,
         build_status, build_type, notes,
         tasks ( id, task_name, task_category, task_order, status, photo_required, notes )
       `)
-      .eq('id', qr.vehicle_id)
-      .single(),
-    supabase
-      .from('job_fitters')
+      .eq('id', qr!.vehicle_id)
+      .single() as Promise<{ data: { job_id: string; vehicle_make: string; vehicle_model: string; vehicle_year: number | null; build_status: string; build_type: string; notes: string | null; tasks: any[] } | null }>,
+    (supabase.from('job_fitters') as any)
       .select('user_id, users(id, name, pin)')
-      .eq('vehicle_id', qr.vehicle_id),
+      .eq('vehicle_id', qr!.vehicle_id) as Promise<{ data: { user_id: string; users: any }[] | null }>,
   ])
 
   if (!vehicle) notFound()

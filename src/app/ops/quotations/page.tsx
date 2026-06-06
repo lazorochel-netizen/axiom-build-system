@@ -115,5 +115,4 @@ export default async function QuotationsPage() {
         )}
       </section>
     </div>
-  )
-}
+  
