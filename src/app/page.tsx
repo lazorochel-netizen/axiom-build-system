@@ -12,11 +12,10 @@ export default async function RootPage() {
     redirect('/login')
   }
 
-  const { data: profile } = await supabase
-    .from('users')
+  const { data: profile } = await (supabase.from('users') as any)
     .select('role')
     .eq('id', user.id)
-    .single()
+    .single() as { data: { role: string } | null }
 
   if (profile?.role === 'operations_manager') {
     redirect('/ops/dashboard')
