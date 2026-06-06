@@ -13,14 +13,13 @@ export default async function EmailPreviewPage({
   const { message } = await searchParams
   const supabase = await createClient()
 
-  const { data: vehicle } = await supabase
-    .from('vehicles')
+  const { data: vehicle } = await (supabase.from('vehicles') as any)
     .select(`
       job_id, vehicle_year, vehicle_make, vehicle_model, build_status,
       customers ( name, email, portal_token )
     `)
     .eq('id', id)
-    .single()
+    .single() as { data: { job_id: string; vehicle_year: number | null; vehicle_make: string; vehicle_model: string; build_status: string; customers: { name: string; email: string | null; portal_token: string } | null } | null }
 
   if (!vehicle) notFound()
 
