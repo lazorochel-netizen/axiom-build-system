@@ -40,16 +40,14 @@ export default async function CustomerPortalPage({
   const supabase = createAdminClient()
 
   // Resolve token → customer → vehicle
-  const { data: customer } = await supabase
-    .from('customers')
+  const { data: customer } = await (supabase.from('customers') as any)
     .select('id, name')
     .eq('portal_token', token)
-    .single()
+    .single() as { data: { id: string; name: string } | null }
 
   if (!customer) notFound()
 
-  const { data: vehicles } = await supabase
-    .from('vehicles')
+  const { data: vehicles } = await (supabase.from('vehicles') as any)
     .select(`
       id, job_id, vehicle_make, vehicle_model, vehicle_year,
       build_status, estimated_completion_date,
@@ -57,7 +55,7 @@ export default async function CustomerPortalPage({
       tasks ( id, task_name, task_category, task_order, status )
     `)
     .eq('customer_id', customer.id)
-    .order('created_at', { ascending: false })
+    .order('created_at', { ascending: false }) as { data: any[] | null }
 
   if (!vehicles || vehicles.length === 0) notFound()
 
