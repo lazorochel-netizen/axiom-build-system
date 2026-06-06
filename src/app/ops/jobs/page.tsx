@@ -56,8 +56,8 @@ export default async function JobsPage({
   const sort = (SORT_OPTIONS.find(o => o.value === sortParam)?.value ?? 'newest') as SortKey
   const supabase = await createClient()
 
-  let query = supabase
-    .from('vehicles')
+  type VehicleRow = { id: string; job_id: string; vehicle_make: string; vehicle_model: string; vehicle_year: number | null; build_type: string; build_status: string; estimated_completion_date: string | null; customers: { name: string } | null }
+  let query = (supabase.from('vehicles') as any)
     .select(`
       id, job_id, vehicle_make, vehicle_model, vehicle_year,
       build_type, build_status, estimated_completion_date,
@@ -76,7 +76,7 @@ export default async function JobsPage({
 
   query = buildSortQuery(query, sort)
 
-  const { data: vehicles } = await query
+  const { data: vehicles } = await query as { data: VehicleRow[] | null }
   const filtered = vehicles ?? []
 
   const statuses: { value: string; label: string }[] = [
@@ -162,7 +162,7 @@ export default async function JobsPage({
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
           {filtered.map(v => {
-            const customer = v.customers as { name: string } | null
+            const customer = v.customers
             const isOverdue = v.estimated_completion_date &&
               new Date(v.estimated_completion_date) < new Date() &&
               !['completed', 'delivered'].includes(v.build_status)
