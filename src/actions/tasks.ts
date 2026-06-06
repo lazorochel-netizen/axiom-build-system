@@ -87,18 +87,16 @@ export async function updateTask(formData: FormData) {
     })
 
     // Check if ALL tasks for this vehicle are now complete → email ops
-    const { data: allTasks } = await supabase
-      .from('tasks')
+    const { data: allTasks } = await (supabase.from('tasks') as any)
       .select('status')
-      .eq('vehicle_id', vehicleId)
+      .eq('vehicle_id', vehicleId) as { data: { status: string }[] | null }
 
     const allDone = allTasks && allTasks.length > 0 && allTasks.every(t => t.status === 'completed')
     if (allDone) {
-      const { data: vehicle } = await supabase
-        .from('vehicles')
+      const { data: vehicle } = await (supabase.from('vehicles') as any)
         .select('job_id, vehicle_year, vehicle_make, vehicle_model')
         .eq('id', vehicleId)
-        .single()
+        .single() as { data: { job_id: string; vehicle_year: number | null; vehicle_make: string; vehicle_model: string } | null }
       if (vehicle) {
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://axiom-build-system.vercel.app'
         await emailAllTasksComplete({
