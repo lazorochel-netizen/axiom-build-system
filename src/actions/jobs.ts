@@ -120,14 +120,13 @@ export async function updateBuildStatus(formData: FormData) {
   })
 
   // Email customer if they have an email address
-  const { data: vehicleData } = await supabase
-    .from('vehicles')
+  const { data: vehicleData } = await (supabase.from('vehicles') as any)
     .select('job_id, vehicle_year, vehicle_make, vehicle_model, customers(name, email, portal_token)')
     .eq('id', vehicleId)
-    .single()
+    .single() as { data: { job_id: string; vehicle_year: number | null; vehicle_make: string; vehicle_model: string; customers: { name: string; email: string | null; portal_token: string } | null } | null }
 
   if (vehicleData) {
-    const customer = vehicleData.customers as { name: string; email: string | null; portal_token: string } | null
+    const customer = vehicleData.customers
     if (customer?.email) {
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://axiom-build-system.vercel.app'
       await emailCustomerStatusUpdate({
