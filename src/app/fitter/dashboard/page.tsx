@@ -116,4 +116,10 @@ export default async function FitterDashboard({
             <JobNoteForm
               vehicleId={vehicle.id}
               existingNotes={notesByVehicle[vehicle.id] ?? []}
-     
+            />
+          </div>
+        )
+      })}
+    </div>
+  )
+}

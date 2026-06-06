@@ -130,4 +130,8 @@ export async function createInvoiceFromBuildLog(formData: FormData) {
     total_amount: log.total_amount ?? 0,
     status:       'draft',
     due_date:     dueDate || null,
-    notes:        `From Build Log: ${log.name}\nCustomer: ${log.customer_name ?? '—'}\nVehicle: ${log.vehicle_info ?? '—'}\nSpec: ${log.spec_label ?? '—'}`
+    notes:        `From Build Log: ${log.name}\nCustomer: ${log.customer_name ?? '—'}\nVehicle: ${log.vehicle_info ?? '—'}\nSpec: ${log.spec_label ?? '—'}`,
+  })
+
+  revalidatePath('/ops/invoices')
+}

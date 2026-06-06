@@ -23,4 +23,7 @@ export async function GET(
   return new NextResponse(new Uint8Array(png), {
     headers: {
       'Content-Type':  'image/png',
-      'Cache-Control': 'no-store'
+      'Cache-Control': 'no-store',
+    },
+  })
+}

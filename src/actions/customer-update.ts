@@ -77,4 +77,5 @@ export async function sendCustomerUpdate(formData: FormData) {
   })
 
   revalidatePath(`/ops/jobs/${vehicleId}`)
-  redirect(`/ops/jobs/${vehicleId}?se
+  redirect(`/ops/jobs/${vehicleId}?sent=1`)
+}

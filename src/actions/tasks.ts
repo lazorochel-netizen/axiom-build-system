@@ -155,4 +155,10 @@ export async function addTask(formData: FormData) {
     role_required:  'fitter',
     is_required:    true,
     photo_required: formData.get('photo_required') === 'on',
-    assigned_to:    formData.get('assigned_to') as string |
+    assigned_to:    formData.get('assigned_to') as string || null,
+    due_date:       (formData.get('due_date') as string) || null,
+    status:         'pending',
+  })
+
+  revalidatePath(`/ops/jobs/${vehicleId}`)
+}
