@@ -108,19 +108,16 @@ export default async function OpsDashboard({
   const supabase = await createClient()
 
   const [{ data: activeRaw }, { data: done, count: doneCount }, { data: allStatuses }] = await Promise.all([
-    supabase
-      .from('vehicles')
+    (supabase.from('vehicles') as any)
       .select('id, job_id, vehicle_make, vehicle_model, vehicle_year, build_status, build_type, estimated_completion_date, created_at, customers(name)')
-      .not('build_status', 'in', '("completed","delivered")'),
-    supabase
-      .from('vehicles')
+      .not('build_status', 'in', '("completed","delivered")') as Promise<{ data: ActiveVehicle[] | null }>,
+    (supabase.from('vehicles') as any)
       .select('id, job_id, vehicle_make, vehicle_model, vehicle_year, build_status', { count: 'exact' })
       .in('build_status', ['completed', 'delivered'])
       .order('created_at', { ascending: false })
-      .range(donePage * DONE_PAGE_SIZE, (donePage + 1) * DONE_PAGE_SIZE - 1),
-    supabase
-      .from('vehicles')
-      .select('build_status'),
+      .range(donePage * DONE_PAGE_SIZE, (donePage + 1) * DONE_PAGE_SIZE - 1) as Promise<{ data: { id: string; job_id: string; vehicle_make: string; vehicle_model: string; vehicle_year: number | null; build_status: string }[] | null; count: number | null }>,
+    (supabase.from('vehicles') as any)
+      .select('build_status') as Promise<{ data: { build_status: string }[] | null }>,
   ])
 
   const active = sortVehicles((activeRaw ?? []) as ActiveVehicle[], currentSort)
