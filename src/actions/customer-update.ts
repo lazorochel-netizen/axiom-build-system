@@ -20,11 +20,18 @@ export async function sendCustomerUpdate(formData: FormData) {
       build_status, customers ( name, email, portal_token )
     `)
     .eq('id', vehicleId)
-    .single()
+    .single() as { data: {
+      job_id: string
+      vehicle_year: number | null
+      vehicle_make: string
+      vehicle_model: string
+      build_status: string
+      customers: { name: string; email: string | null; portal_token: string } | null
+    } | null, error: unknown }
 
   if (!vehicle) return redirect(`/ops/jobs/${vehicleId}?error=Job+not+found`)
 
-  const customer = vehicle.customers as { name: string; email: string | null; portal_token: string } | null
+  const customer = vehicle.customers
 
   if (!customer?.email) {
     return redirect(`/ops/jobs/${vehicleId}?error=${encodeURIComponent('Customer has no email address on file')}`)
@@ -65,10 +72,4 @@ export async function sendCustomerUpdate(formData: FormData) {
     vehicle_id: vehicleId,
     user_id:    user.id,
     action:     'customer_email_sent',
-    old_value:  null,
-    new_value:  { status: vehicle.build_status, has_message: !!customMessage },
-  })
-
-  revalidatePath(`/ops/jobs/${vehicleId}`)
-  redirect(`/ops/jobs/${vehicleId}?sent=1`)
-}
+  
