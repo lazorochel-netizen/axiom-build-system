@@ -21,11 +21,10 @@ export default async function FittersPage({
   const { pin_error, staff_error } = await searchParams
   const supabase = await createClient()
 
-  const { data: staff } = await supabase
-    .from('users')
+  const { data: staff } = await (supabase.from('users') as any)
     .select('id, name, email, role, pin, created_at')
     .order('role')
-    .order('name')
+    .order('name') as { data: { id: string; name: string; email: string | null; role: string; pin: string | null; created_at: string }[] | null }
 
   const managers      = staff?.filter(s => s.role === 'operations_manager') ?? []
   const fitters       = staff?.filter(s => s.role === 'fitter') ?? []
