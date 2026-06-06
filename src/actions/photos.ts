@@ -59,6 +59,6 @@ export async function togglePhotoVisibility(formData: FormData) {
   const vehicleId = formData.get('vehicle_id') as string
   const visible   = formData.get('visible') === 'true'
 
-  await supabase.from('photos').update({ is_customer_visible: !visible }).eq('id', photoId)
+  await (supabase.from('photos') as any).update({ is_customer_visible: !visible }).eq('id', photoId)
   revalidatePath(`/ops/jobs/${vehicleId}`)
 }

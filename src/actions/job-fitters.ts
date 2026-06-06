@@ -13,7 +13,7 @@ export async function assignFitterToJob(formData: FormData) {
   const vehicleId = formData.get('vehicle_id') as string
   const userId    = formData.get('user_id') as string
 
-  await supabase.from('job_fitters').upsert({ vehicle_id: vehicleId, user_id: userId })
+  await (supabase.from('job_fitters') as any).upsert({ vehicle_id: vehicleId, user_id: userId })
 
   // Send assignment email to fitter
   const [{ data: fitter }, { data: vehicle }] = await Promise.all([
@@ -46,6 +46,6 @@ export async function removeFitterFromJob(formData: FormData) {
   const vehicleId = formData.get('vehicle_id') as string
   const userId    = formData.get('user_id') as string
 
-  await supabase.from('job_fitters').delete().eq('vehicle_id', vehicleId).eq('user_id', userId)
+  await (supabase.from('job_fitters') as any).delete().eq('vehicle_id', vehicleId).eq('user_id', userId)
   revalidatePath(`/ops/jobs/${vehicleId}`)
 }

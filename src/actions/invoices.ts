@@ -32,7 +32,7 @@ export async function createInvoice(formData: FormData) {
     ? lineItems.reduce((sum, item) => sum + item.quantity * item.unit_price, 0)
     : parseFloat(formData.get('total_amount') as string) || 0
 
-  const { data: invoice } = await supabase.from('invoices').insert({
+  const { data: invoice } = await (supabase.from('invoices') as any).insert({
     vehicle_id:   vehicleId,
     customer_id:  customerId,
     created_by:   user.id,
@@ -44,7 +44,7 @@ export async function createInvoice(formData: FormData) {
 
   // Insert line items if any
   if (invoice && lineItems.length > 0) {
-    await supabase.from('invoice_items').insert(
+    await (supabase.from('invoice_items') as any).insert(
       lineItems.map(item => ({ ...item, invoice_id: invoice.id }))
     )
   }
@@ -68,7 +68,7 @@ export async function convertQuotationToInvoice(formData: FormData) {
 
   if (!q) return
 
-  await supabase.from('invoices').insert({
+  await (supabase.from('invoices') as any).insert({
     vehicle_id:    q.vehicle_id,
     customer_id:   q.customer_id,
     quotation_id:  quotationId,
@@ -91,7 +91,7 @@ export async function updateInvoiceStatus(formData: FormData) {
   const invoiceId = formData.get('invoice_id') as string
   const status    = formData.get('status') as string
 
-  await supabase.from('invoices').update({ status }).eq('id', invoiceId)
+  await (supabase.from('invoices') as any).update({ status }).eq('id', invoiceId)
   revalidatePath('/ops/invoices')
 }
 
@@ -103,7 +103,7 @@ export async function updateQuotationStatus(formData: FormData) {
   const quotationId = formData.get('quotation_id') as string
   const status      = formData.get('status') as string
 
-  await supabase.from('quotations').update({ status }).eq('id', quotationId)
+  await (supabase.from('quotations') as any).update({ status }).eq('id', quotationId)
   revalidatePath('/ops/quotations')
 }
 
@@ -124,7 +124,7 @@ export async function createInvoiceFromBuildLog(formData: FormData) {
 
   if (!log) return
 
-  await supabase.from('invoices').insert({
+  await (supabase.from('invoices') as any).insert({
     vehicle_id:   vehicleId,
     customer_id:  null,
     created_by:   user.id,

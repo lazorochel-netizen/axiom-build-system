@@ -69,7 +69,7 @@ export async function updateTask(formData: FormData) {
   const status    = formData.get('status') as string
   const assignedTo = formData.get('assigned_to') as string || null
 
-  await supabase.from('tasks').update({
+  await (supabase.from('tasks') as any).update({
     status,
     assigned_to: assignedTo,
     ...(status === 'completed' ? { completed_by: user.id, completed_at: new Date().toISOString() } : {}),
@@ -123,7 +123,7 @@ export async function deleteTask(formData: FormData) {
   const taskId    = formData.get('task_id') as string
   const vehicleId = formData.get('vehicle_id') as string
 
-  await supabase.from('tasks').delete().eq('id', taskId)
+  await (supabase.from('tasks') as any).delete().eq('id', taskId)
   revalidatePath(`/ops/jobs/${vehicleId}`)
 }
 
@@ -137,7 +137,7 @@ export async function editTaskName(formData: FormData) {
   const taskName  = formData.get('task_name') as string
   const taskCategory = formData.get('task_category') as string
 
-  await supabase.from('tasks').update({ task_name: taskName, task_category: taskCategory }).eq('id', taskId)
+  await (supabase.from('tasks') as any).update({ task_name: taskName, task_category: taskCategory }).eq('id', taskId)
   revalidatePath(`/ops/jobs/${vehicleId}`)
 }
 
@@ -149,7 +149,7 @@ export async function addTask(formData: FormData) {
 
   const vehicleId = formData.get('vehicle_id') as string
 
-  await supabase.from('tasks').insert({
+  await (supabase.from('tasks') as any).insert({
     vehicle_id:     vehicleId,
     task_name:      formData.get('task_name') as string,
     task_category:  formData.get('task_category') as string,

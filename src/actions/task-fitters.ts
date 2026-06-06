@@ -13,7 +13,7 @@ export async function assignFitterToTask(formData: FormData) {
   const userId    = formData.get('user_id') as string
   const vehicleId = formData.get('vehicle_id') as string
 
-  await supabase.from('task_fitters').upsert({ task_id: taskId, user_id: userId })
+  await (supabase.from('task_fitters') as any).upsert({ task_id: taskId, user_id: userId })
   revalidatePath(`/ops/jobs/${vehicleId}`)
 }
 
@@ -26,6 +26,6 @@ export async function removeFitterFromTask(formData: FormData) {
   const userId    = formData.get('user_id') as string
   const vehicleId = formData.get('vehicle_id') as string
 
-  await supabase.from('task_fitters').delete().eq('task_id', taskId).eq('user_id', userId)
+  await (supabase.from('task_fitters') as any).delete().eq('task_id', taskId).eq('user_id', userId)
   revalidatePath(`/ops/jobs/${vehicleId}`)
 }

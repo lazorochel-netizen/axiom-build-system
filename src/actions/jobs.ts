@@ -100,7 +100,7 @@ export async function createJob(formData: FormData) {
         { vehicle_id: vehicle.id, task_name: 'Upgrades',               task_category: 'Upgrades',              task_order: 3, role_required: 'fitter' as const, is_required: true, photo_required: false, status: 'pending' as const },
       ]
 
-  await supabase.from('tasks').insert(tasksToInsert)
+  await (supabase.from('tasks') as any).insert(tasksToInsert)
 
   redirect(`/ops/jobs/${vehicle.id}`)
 }
@@ -113,7 +113,7 @@ export async function updateBuildStatus(formData: FormData) {
   const vehicleId   = formData.get('vehicle_id') as string
   const buildStatus = formData.get('build_status') as string
 
-  await supabase.from('vehicles').update({
+  await (supabase.from('vehicles') as any).update({
     build_status: buildStatus,
     ...(buildStatus === 'delivered' ? { handover_date: new Date().toISOString().split('T')[0] } : {}),
   }).eq('id', vehicleId)
@@ -162,7 +162,7 @@ export async function saveJobNotes(formData: FormData) {
   const vehicleId = formData.get('vehicle_id') as string
   const notes     = formData.get('notes') as string
 
-  await supabase.from('vehicles').update({ notes }).eq('id', vehicleId)
+  await (supabase.from('vehicles') as any).update({ notes }).eq('id', vehicleId)
 
   await (supabase.from('activity_log') as any).insert({
     vehicle_id: vehicleId,
@@ -184,7 +184,7 @@ export async function updateJobDetails(formData: FormData) {
   const customerId = formData.get('customer_id') as string
 
   // Update vehicle fields
-  await supabase.from('vehicles').update({
+  await (supabase.from('vehicles') as any).update({
     vehicle_make:              formData.get('vehicle_make') as string,
     vehicle_model:             formData.get('vehicle_model') as string,
     vehicle_year:              Number(formData.get('vehicle_year')) || null,
@@ -197,7 +197,7 @@ export async function updateJobDetails(formData: FormData) {
 
   // Update customer fields
   if (customerId) {
-    await supabase.from('customers').update({
+    await (supabase.from('customers') as any).update({
       name:  formData.get('customer_name') as string,
       email: (formData.get('customer_email') as string) || null,
       phone: (formData.get('customer_phone') as string) || null,
@@ -223,10 +223,10 @@ export async function deleteJob(formData: FormData) {
   const vehicleId = formData.get('vehicle_id') as string
 
   // Delete in order: tasks, qr_codes, photos, vehicle (customer kept)
-  await supabase.from('tasks').delete().eq('vehicle_id', vehicleId)
-  await supabase.from('qr_codes').delete().eq('vehicle_id', vehicleId)
-  await supabase.from('photos').delete().eq('vehicle_id', vehicleId)
-  await supabase.from('vehicles').delete().eq('id', vehicleId)
+  await (supabase.from('tasks') as any).delete().eq('vehicle_id', vehicleId)
+  await (supabase.from('qr_codes') as any).delete().eq('vehicle_id', vehicleId)
+  await (supabase.from('photos') as any).delete().eq('vehicle_id', vehicleId)
+  await (supabase.from('vehicles') as any).delete().eq('id', vehicleId)
 
   redirect('/ops/jobs')
 }

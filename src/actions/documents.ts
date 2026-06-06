@@ -32,7 +32,7 @@ export async function uploadDocument(formData: FormData) {
     .from('job-documents')
     .getPublicUrl(fileName)
 
-  await supabase.from('documents').insert({
+  await (supabase.from('documents') as any).insert({
     vehicle_id:    vehicleId,
     document_name: docName,
     document_type: docType,
@@ -51,6 +51,6 @@ export async function deleteDocument(formData: FormData) {
   const documentId = formData.get('document_id') as string
   const vehicleId  = formData.get('vehicle_id') as string
 
-  await supabase.from('documents').delete().eq('id', documentId)
+  await (supabase.from('documents') as any).delete().eq('id', documentId)
   revalidatePath(`/ops/jobs/${vehicleId}`)
 }
