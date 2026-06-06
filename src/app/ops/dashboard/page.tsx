@@ -76,10 +76,8 @@ function sortVehicles(vehicles: ActiveVehicle[], sort: string): ActiveVehicle[] 
         const bDate = b.estimated_completion_date ? new Date(b.estimated_completion_date) : null
         const aOverdue = aDate && aDate < now
         const bOverdue = bDate && bDate < now
-        // Overdue jobs float to top
         if (aOverdue && !bOverdue) return -1
         if (!aOverdue && bOverdue) return 1
-        // Within same group, sort by date ascending
         if (!aDate && !bDate) return 0
         if (!aDate) return 1
         if (!bDate) return -1
@@ -126,8 +124,6 @@ export default async function OpsDashboard({
   ])
 
   const active = sortVehicles((activeRaw ?? []) as ActiveVehicle[], currentSort)
-
-  // Build a base URL for the sort control (preserves page param if set)
   const baseUrl = donePage > 0 ? `/ops/dashboard?page=${donePage}` : '/ops/dashboard'
 
   return (
@@ -185,4 +181,77 @@ export default async function OpsDashboard({
                   prefetch={true}
                   className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 transition-colors"
                 >
-                  <d
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-slate-900 truncate">
+                      {v.vehicle_year} {v.vehicle_make} {v.vehicle_model}
+                    </p>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      {v.job_id}
+                      {customerName && <> · {customerName}</>}
+                    </p>
+                    {v.estimated_completion_date && (
+                      <p className={`text-xs mt-0.5 ${isOverdue ? 'text-red-500 font-medium' : 'text-slate-400'}`}>
+                        {isOverdue ? '⚠ Overdue · ' : 'Due '}
+                        {new Date(v.estimated_completion_date).toLocaleDateString('en-AU', {
+                          day: 'numeric', month: 'short', year: 'numeric',
+                        })}
+                      </p>
+                    )}
+                  </div>
+                  <span className={`shrink-0 ml-3 text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_COLOURS[v.build_status as BuildStatus] ?? 'bg-slate-100 text-slate-500'}`}>
+                    {STATUS_LABELS[v.build_status as BuildStatus] ?? v.build_status}
+                  </span>
+                </Link>
+              )
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* Completed / Delivered jobs */}
+      {(doneCount ?? 0) > 0 && (
+        <section>
+          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">
+            Completed &amp; Delivered <span className="text-slate-400 font-normal">({doneCount})</span>
+          </h2>
+          <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
+            {(done ?? []).map(v => (
+              <Link
+                key={v.id}
+                href={`/ops/jobs/${v.id}`}
+                prefetch={true}
+                className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 transition-colors"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-slate-700 truncate">
+                    {v.vehicle_year} {v.vehicle_make} {v.vehicle_model}
+                  </p>
+                  <p className="text-xs text-slate-400 mt-0.5">{v.job_id}</p>
+                </div>
+                <span className={`shrink-0 ml-3 text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_COLOURS[v.build_status as BuildStatus] ?? 'bg-slate-100 text-slate-500'}`}>
+                  {STATUS_LABELS[v.build_status as BuildStatus] ?? v.build_status}
+                </span>
+              </Link>
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {(doneCount ?? 0) > DONE_PAGE_SIZE && (
+            <div className="flex justify-between mt-3">
+              {donePage > 0 ? (
+                <Link href={`/ops/dashboard?page=${donePage - 1}${currentSort !== 'newest' ? `&sort=${currentSort}` : ''}`} className="text-sm text-[#5B2D8E] hover:underline">
+                  ← Previous
+                </Link>
+              ) : <span />}
+              {(donePage + 1) * DONE_PAGE_SIZE < (doneCount ?? 0) && (
+                <Link href={`/ops/dashboard?page=${donePage + 1}${currentSort !== 'newest' ? `&sort=${currentSort}` : ''}`} className="text-sm text-[#5B2D8E] hover:underline">
+                  Next →
+                </Link>
+              )}
+            </div>
+          )}
+        </section>
+      )}
+    </div>
+  )
+}
