@@ -20,7 +20,7 @@ const STATUS_COLOURS: Record<string, string> = {
   kit_designing:         'bg-orange-100 text-orange-700',
   kit_production:        'bg-orange-100 text-orange-700',
   kit_dispatched:        'bg-yellow-100 text-yellow-700',
-  in_progress:           'bg-blue-100 text-blue-700',
+  in_progress:           'bg-blue-100 text-[#4A2478]',
   waiting_on_parts:      'bg-amber-100 text-amber-700',
   waiting_on_compliance: 'bg-purple-100 text-purple-700',
   completed:             'bg-green-100 text-green-700',
@@ -53,7 +53,7 @@ export default function BuildStatusSelect({
       value={status}
       onChange={handleChange}
       disabled={isPending}
-      className={`text-xs font-medium px-2.5 py-1.5 rounded-full border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 ${STATUS_COLOURS[status] ?? STATUS_COLOURS.pending}`}
+      className={`text-xs font-medium px-2.5 py-1.5 rounded-full border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#5B2D8E] ${STATUS_COLOURS[status] ?? STATUS_COLOURS.pending}`}
     >
       {STATUSES.map(s => (
         <option key={s.value} value={s.value}>{s.label}</option>

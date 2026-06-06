@@ -22,8 +22,8 @@ export default async function OpsLayout({
   return (
     <div className="min-h-screen flex flex-col">
       {/* Top Nav */}
-      <header className="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
-        <span className="font-semibold text-slate-900">Axiom Build System</span>
+      <header className="bg-white border-b border-slate-200 px-4 py-2 flex items-center justify-between">
+        <img src="/axiom-logo.png" alt="Axiom Group" className="h-9 w-auto" />
         <div className="flex items-center gap-4">
           <span className="text-sm text-slate-500">{profile.name}</span>
           <form action="/auth/signout" method="post">

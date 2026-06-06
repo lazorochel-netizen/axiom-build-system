@@ -34,7 +34,7 @@ export default async function CustomersPage({
           name="q"
           defaultValue={q}
           placeholder="Search by name, email, or phone…"
-          className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]"
         />
       </form>
 
@@ -55,7 +55,7 @@ export default async function CustomersPage({
                 <a
                   href={`/portal/${customer.portal_token}`}
                   target="_blank"
-                  className="text-xs text-blue-600 hover:underline shrink-0"
+                  className="text-xs text-[#5B2D8E] hover:underline shrink-0"
                 >
                   Portal link →
                 </a>
@@ -75,7 +75,7 @@ export default async function CustomersPage({
                       <span className={`ml-1 px-1.5 py-0.5 rounded-full text-xs font-medium ${
                         v.build_status === 'completed' || v.build_status === 'delivered'
                           ? 'bg-green-100 text-green-700'
-                          : 'bg-blue-100 text-blue-700'
+                          : 'bg-blue-100 text-[#4A2478]'
                       }`}>
                         {v.build_status.replace(/_/g, ' ')}
                       </span>

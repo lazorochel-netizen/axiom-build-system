@@ -97,7 +97,7 @@ export default async function ManufacturerDashboard() {
                       <select
                         name="status"
                         defaultValue={currentStatus === 'pending' ? 'designing' : currentStatus.replace('kit_', '')}
-                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]"
                       >
                         <option value="designing">Designing</option>
                         <option value="production">In Production</option>
@@ -108,7 +108,7 @@ export default async function ManufacturerDashboard() {
                     <div className="flex items-end">
                       <button
                         type="submit"
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+                        className="w-full bg-[#5B2D8E] hover:bg-[#4A2478] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
                       >
                         Update Status
                       </button>
@@ -124,7 +124,7 @@ export default async function ManufacturerDashboard() {
                       defaultValue={kit?.manufacturer_notes ?? ''}
                       rows={2}
                       placeholder="e.g. Custom solar bracket welded as requested. Dispatching Monday."
-                      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E] resize-none"
                     />
                   </div>
 

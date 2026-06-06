@@ -97,7 +97,7 @@ export default async function CustomerPortalPage({
               {/* Status */}
               <div className="bg-white rounded-xl border border-slate-200 p-4">
                 <p className="text-xs text-slate-400 mb-2">Current Status</p>
-                <span className="inline-block bg-blue-100 text-blue-700 text-sm font-medium px-3 py-1.5 rounded-full">
+                <span className="inline-block bg-blue-100 text-[#4A2478] text-sm font-medium px-3 py-1.5 rounded-full">
                   {STAGE_LABELS[status]}
                 </span>
                 <p className="text-sm text-slate-600 mt-3">{STAGE_DESCRIPTIONS[status]}</p>
@@ -134,7 +134,7 @@ export default async function CustomerPortalPage({
                         <p className="text-xs text-slate-400">{done} / {total} tasks</p>
                       </div>
                       <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-blue-500 rounded-full transition-all" style={{ width: `${Math.round((done / total) * 100)}%` }} />
+                        <div className="h-full bg-[#F3EEF9]0 rounded-full transition-all" style={{ width: `${Math.round((done / total) * 100)}%` }} />
                       </div>
                     </div>
 
@@ -155,7 +155,7 @@ export default async function CustomerPortalPage({
                                   </div>
                                 ) : isActive ? (
                                   <div className="w-4 h-4 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+                                    <div className="w-1.5 h-1.5 rounded-full bg-[#5B2D8E]" />
                                   </div>
                                 ) : (
                                   <div className="w-4 h-4 rounded-full border border-slate-200 bg-slate-50 shrink-0" />

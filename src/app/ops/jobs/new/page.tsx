@@ -34,7 +34,7 @@ export default async function NewJobPage({
       )}
 
       {pre.customer && (
-        <div className="mb-4 px-4 py-2.5 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+        <div className="mb-4 px-4 py-2.5 bg-[#F3EEF9] border border-blue-200 rounded-lg text-sm text-[#4A2478]">
           Pre-filled from Build Log Sheet — review and confirm before creating.
         </div>
       )}
@@ -60,7 +60,7 @@ export default async function NewJobPage({
                 name="build_type"
                 required
                 defaultValue={pre.build_type}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]"
               >
                 <option value="">Select build type…</option>
                 {BUILD_TYPES.map(t => (
@@ -99,7 +99,7 @@ export default async function NewJobPage({
         <div className="flex gap-3">
           <button
             type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2.5 rounded-lg text-sm transition-colors"
+            className="bg-[#5B2D8E] hover:bg-[#4A2478] text-white font-medium px-6 py-2.5 rounded-lg text-sm transition-colors"
           >
             Create Job
           </button>
@@ -134,7 +134,7 @@ function Field({
         placeholder={placeholder}
         required={required}
         defaultValue={defaultValue}
-        className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]"
       />
     </div>
   )

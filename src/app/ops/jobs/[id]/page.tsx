@@ -15,7 +15,7 @@ import PreviewEmailButton from '@/components/PreviewEmailButton'
 
 const TASK_STATUS_COLOURS: Record<string, string> = {
   pending:         'bg-slate-100 text-slate-600',
-  in_progress:     'bg-blue-100 text-blue-700',
+  in_progress:     'bg-blue-100 text-[#4A2478]',
   waiting_for_kit: 'bg-amber-100 text-amber-700',
   completed:       'bg-green-100 text-green-700',
 }
@@ -159,49 +159,49 @@ export default async function JobDetailPage({
           {/* Customer */}
           <div className="px-4 py-3 grid grid-cols-[140px_1fr] gap-3 items-center">
             <label className="text-sm text-slate-500">Customer</label>
-            <input name="customer_name" defaultValue={customer?.name ?? ''} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full" />
+            <input name="customer_name" defaultValue={customer?.name ?? ''} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E] w-full" />
           </div>
           <div className="px-4 py-3 grid grid-cols-[140px_1fr] gap-3 items-center">
             <label className="text-sm text-slate-500">Email</label>
-            <input name="customer_email" type="email" defaultValue={customer?.email ?? ''} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full" />
+            <input name="customer_email" type="email" defaultValue={customer?.email ?? ''} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E] w-full" />
           </div>
           <div className="px-4 py-3 grid grid-cols-[140px_1fr] gap-3 items-center">
             <label className="text-sm text-slate-500">Phone</label>
-            <input name="customer_phone" defaultValue={customer?.phone ?? ''} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full" />
+            <input name="customer_phone" defaultValue={customer?.phone ?? ''} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E] w-full" />
           </div>
 
           {/* Vehicle */}
           <div className="px-4 py-3 grid grid-cols-[140px_1fr] gap-3 items-center">
             <label className="text-sm text-slate-500">Make</label>
-            <input name="vehicle_make" defaultValue={vehicle.vehicle_make} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full" />
+            <input name="vehicle_make" defaultValue={vehicle.vehicle_make} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E] w-full" />
           </div>
           <div className="px-4 py-3 grid grid-cols-[140px_1fr] gap-3 items-center">
             <label className="text-sm text-slate-500">Model</label>
-            <input name="vehicle_model" defaultValue={vehicle.vehicle_model} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full" />
+            <input name="vehicle_model" defaultValue={vehicle.vehicle_model} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E] w-full" />
           </div>
           <div className="px-4 py-3 grid grid-cols-[140px_1fr] gap-3 items-center">
             <label className="text-sm text-slate-500">Year</label>
-            <input name="vehicle_year" type="number" defaultValue={vehicle.vehicle_year ?? ''} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full" />
+            <input name="vehicle_year" type="number" defaultValue={vehicle.vehicle_year ?? ''} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E] w-full" />
           </div>
           <div className="px-4 py-3 grid grid-cols-[140px_1fr] gap-3 items-center">
             <label className="text-sm text-slate-500">VIN</label>
-            <input name="vin" defaultValue={vehicle.vin ?? ''} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full" />
+            <input name="vin" defaultValue={vehicle.vin ?? ''} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E] w-full" />
           </div>
           <div className="px-4 py-3 grid grid-cols-[140px_1fr] gap-3 items-center">
             <label className="text-sm text-slate-500">Stock No.</label>
-            <input name="stock_number" defaultValue={vehicle.stock_number ?? ''} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full" />
+            <input name="stock_number" defaultValue={vehicle.stock_number ?? ''} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E] w-full" />
           </div>
           <div className="px-4 py-3 grid grid-cols-[140px_1fr] gap-3 items-center">
             <label className="text-sm text-slate-500">Registration</label>
-            <input name="registration" defaultValue={vehicle.registration ?? ''} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full" />
+            <input name="registration" defaultValue={vehicle.registration ?? ''} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E] w-full" />
           </div>
           <div className="px-4 py-3 grid grid-cols-[140px_1fr] gap-3 items-center">
             <label className="text-sm text-slate-500">Build Type</label>
-            <input name="build_type" defaultValue={vehicle.build_type} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full" />
+            <input name="build_type" defaultValue={vehicle.build_type} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E] w-full" />
           </div>
           <div className="px-4 py-3 grid grid-cols-[140px_1fr] gap-3 items-center">
             <label className="text-sm text-slate-500">Est. Completion</label>
-            <input name="estimated_completion_date" type="date" defaultValue={vehicle.estimated_completion_date ?? ''} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full" />
+            <input name="estimated_completion_date" type="date" defaultValue={vehicle.estimated_completion_date ?? ''} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E] w-full" />
           </div>
 
           <div className="px-4 py-3">
@@ -215,7 +215,7 @@ export default async function JobDetailPage({
         <h2 className="text-sm font-semibold text-slate-700 mb-3">Assigned Fitters</h2>
         <div className="flex flex-wrap gap-2 mb-3">
           {jobFitters && jobFitters.length > 0 ? jobFitters.map((jf: any) => (
-            <div key={jf.user_id} className="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-full px-3 py-1.5">
+            <div key={jf.user_id} className="flex items-center gap-2 bg-[#F3EEF9] border border-blue-100 rounded-full px-3 py-1.5">
               <span className="text-sm text-blue-800 font-medium">{jf.users?.name}</span>
               <form action={removeFitterFromJob}>
                 <input type="hidden" name="vehicle_id" value={id} />
@@ -230,7 +230,7 @@ export default async function JobDetailPage({
         {fitters && fitters.filter(f => !jobFitters?.find((jf: any) => jf.user_id === f.id)).length > 0 && (
           <form action={assignFitterToJob} className="flex items-center gap-2">
             <input type="hidden" name="vehicle_id" value={id} />
-            <select name="user_id" className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select name="user_id" className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]">
               <option value="">Select fitter to add…</option>
               {fitters.filter(f => !jobFitters?.find((jf: any) => jf.user_id === f.id)).map(f => (
                 <option key={f.id} value={f.id}>{f.name}</option>
@@ -249,7 +249,7 @@ export default async function JobDetailPage({
         </div>
         <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
           <div
-            className="h-full bg-blue-500 rounded-full transition-all"
+            className="h-full bg-[#F3EEF9]0 rounded-full transition-all"
             style={{ width: totalTasks ? `${(doneTasks / totalTasks) * 100}%` : '0%' }}
           />
         </div>
@@ -289,7 +289,7 @@ export default async function JobDetailPage({
                   name="task_name"
                   required
                   placeholder="e.g. Install 12V lighting"
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]"
                 />
               </div>
               <div>
@@ -297,7 +297,7 @@ export default async function JobDetailPage({
                 <select
                   name="task_category"
                   required
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]"
                 >
                   {TASK_CATEGORIES.map(c => <option key={c}>{c}</option>)}
                 </select>
@@ -309,7 +309,7 @@ export default async function JobDetailPage({
                 <label className="block text-xs font-medium text-slate-600 mb-1">Assign to Fitter</label>
                 <select
                   name="assigned_to"
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]"
                 >
                   <option value="">Unassigned</option>
                   {(fitters ?? []).map((f: { id: string; name: string }) => (
@@ -322,7 +322,7 @@ export default async function JobDetailPage({
                 <input
                   type="date"
                   name="due_date"
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]"
                 />
               </div>
               <div>
@@ -331,7 +331,7 @@ export default async function JobDetailPage({
                   type="number"
                   name="task_order"
                   defaultValue={totalTasks + 1}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]"
                 />
               </div>
             </div>
@@ -357,7 +357,7 @@ export default async function JobDetailPage({
               defaultValue={vehicle.notes ?? ''}
               rows={4}
               placeholder="Add notes for the fitter — e.g. customer requests, special upgrades, changes to the build..."
-              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E] resize-none"
             />
             <SubmitButton label="Save Notes" pendingLabel="Saving…" />
           </form>
@@ -381,7 +381,7 @@ export default async function JobDetailPage({
                     <input type="hidden" name="photo_id" value={photo.id} />
                     <input type="hidden" name="vehicle_id" value={id} />
                     <input type="hidden" name="visible" value={String(photo.is_customer_visible)} />
-                    <button type="submit" className="text-xs text-blue-600 hover:underline">
+                    <button type="submit" className="text-xs text-[#5B2D8E] hover:underline">
                       {photo.is_customer_visible ? 'Hide' : 'Show to customer'}
                     </button>
                   </form>
@@ -409,7 +409,7 @@ export default async function JobDetailPage({
               <p className="text-slate-500 mb-1">Fitter scan link:</p>
               <a
                 href={`/job/${activeQR.token}`}
-                className="text-blue-600 underline break-all text-xs"
+                className="text-[#5B2D8E] underline break-all text-xs"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -435,7 +435,7 @@ export default async function JobDetailPage({
         {(() => {
           const KIT_COLOURS: Record<string, string> = {
             designing:  'bg-slate-100 text-slate-600',
-            production: 'bg-blue-100 text-blue-700',
+            production: 'bg-blue-100 text-[#4A2478]',
             completed:  'bg-green-100 text-green-700',
             dispatched: 'bg-purple-100 text-purple-700',
           }
@@ -485,7 +485,7 @@ export default async function JobDetailPage({
               <div key={doc.id} className="flex items-center justify-between px-4 py-3 gap-3">
                 <div className="flex-1 min-w-0">
                   <a href={doc.file_url} target="_blank" rel="noopener noreferrer"
-                    className="text-sm font-medium text-blue-600 hover:underline truncate block">
+                    className="text-sm font-medium text-[#5B2D8E] hover:underline truncate block">
                     {doc.document_name}
                   </a>
                   <p className="text-xs text-slate-400 mt-0.5">{doc.document_type} · {new Date(doc.uploaded_at).toLocaleDateString('en-AU')}</p>
@@ -511,12 +511,12 @@ export default async function JobDetailPage({
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">Document Name</label>
                 <input name="document_name" placeholder="e.g. Compliance Certificate"
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">Type</label>
                 <select name="document_type"
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]">
                   <option value="Compliance Certificate">Compliance Certificate</option>
                   <option value="Inspection Report">Inspection Report</option>
                   <option value="Invoice">Invoice</option>
@@ -528,7 +528,7 @@ export default async function JobDetailPage({
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-1">File *</label>
               <input type="file" name="document" required accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                className="block w-full text-sm text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+                className="block w-full text-sm text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#F3EEF9] file:text-[#4A2478] hover:file:bg-blue-100" />
             </div>
             <SubmitButton label="Upload" pendingLabel="Uploading…" />
           </form>
@@ -556,7 +556,7 @@ export default async function JobDetailPage({
                     : vehicle.build_status.startsWith('kit_')
                     ? 'bg-orange-100 text-orange-700'
                     : vehicle.build_status === 'in_progress'
-                    ? 'bg-blue-100 text-blue-700'
+                    ? 'bg-blue-100 text-[#4A2478]'
                     : 'bg-slate-100 text-slate-600'
                 }`}>
                   {vehicle.build_status.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
@@ -574,14 +574,14 @@ export default async function JobDetailPage({
                     name="custom_message"
                     rows={3}
                     placeholder="e.g. Your conversion kit arrived this morning and our team is ready to begin fitting next week. We'll send another update when work starts."
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E] resize-none"
                   />
                 </div>
                 <div className="flex gap-2">
                   <SubmitButton
                     label="Send Update to Customer"
                     pendingLabel="Sending…"
-                    className="bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+                    className="bg-[#5B2D8E] hover:bg-[#4A2478] disabled:opacity-60 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
                   />
                   <PreviewEmailButton previewBaseUrl={`/ops/jobs/${id}/email-preview`} />
                 </div>

@@ -27,7 +27,7 @@ const STATUS_COLOURS: Record<BuildStatus, string> = {
   kit_designing:          'bg-orange-100 text-orange-700',
   kit_production:         'bg-orange-100 text-orange-700',
   kit_dispatched:         'bg-yellow-100 text-yellow-700',
-  in_progress:            'bg-blue-100 text-blue-700',
+  in_progress:            'bg-blue-100 text-[#4A2478]',
   waiting_on_parts:       'bg-amber-100 text-amber-700',
   waiting_on_compliance:  'bg-purple-100 text-purple-700',
   completed:              'bg-green-100 text-green-700',
@@ -136,7 +136,7 @@ export default async function OpsDashboard({
         <h1 className="text-xl font-semibold text-slate-900">Dashboard</h1>
         <Link
           href="/ops/jobs/new"
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+          className="bg-[#5B2D8E] hover:bg-[#4A2478] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
         >
           + New Job
         </Link>
@@ -185,74 +185,4 @@ export default async function OpsDashboard({
                   prefetch={true}
                   className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 transition-colors"
                 >
-                  <div>
-                    <p className="text-sm font-medium text-slate-900">
-                      {v.vehicle_year} {v.vehicle_make} {v.vehicle_model}
-                      {isOverdue && (
-                        <span className="ml-2 text-xs font-medium text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full">
-                          Overdue
-                        </span>
-                      )}
-                    </p>
-                    <p className="text-xs text-slate-400">
-                      {v.job_id}
-                      {customerName && <> · <span className="text-slate-500">{customerName}</span></>}
-                      {v.estimated_completion_date && (
-                        <> · Due {new Date(v.estimated_completion_date).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}</>
-                      )}
-                    </p>
-                  </div>
-                  <span className={`shrink-0 text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_COLOURS[v.build_status as BuildStatus]}`}>
-                    {STATUS_LABELS[v.build_status as BuildStatus]}
-                  </span>
-                </Link>
-              )
-            })}
-          </div>
-        )}
-      </section>
-
-      {/* Completed & Delivered jobs — paginated */}
-      {(done?.length ?? 0) > 0 && (
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide">
-              Completed & Delivered
-            </h2>
-            <span className="text-xs text-slate-400">{doneCount ?? 0} total</span>
-          </div>
-          <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
-            {done!.map(v => (
-              <Link
-                key={v.id}
-                href={`/ops/jobs/${v.id}`}
-                prefetch={true}
-                className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 transition-colors"
-              >
-                <div>
-                  <p className="text-sm font-medium text-slate-900">
-                    {v.vehicle_year} {v.vehicle_make} {v.vehicle_model}
-                  </p>
-                  <p className="text-xs text-slate-400">{v.job_id}</p>
-                </div>
-                <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_COLOURS[v.build_status as BuildStatus]}`}>
-                  {STATUS_LABELS[v.build_status as BuildStatus]}
-                </span>
-              </Link>
-            ))}
-          </div>
-          {(doneCount ?? 0) > DONE_PAGE_SIZE && (
-            <div className="flex justify-between mt-3">
-              {donePage > 0 ? (
-                <a href={`?page=${donePage - 1}${currentSort !== 'newest' ? `&sort=${currentSort}` : ''}`} className="text-xs text-blue-600 hover:underline">← Newer</a>
-              ) : <span />}
-              {(donePage + 1) * DONE_PAGE_SIZE < (doneCount ?? 0) && (
-                <a href={`?page=${donePage + 1}${currentSort !== 'newest' ? `&sort=${currentSort}` : ''}`} className="text-xs text-blue-600 hover:underline">Older →</a>
-              )}
-            </div>
-          )}
-        </section>
-      )}
-    </div>
-  )
-}
+                  <d

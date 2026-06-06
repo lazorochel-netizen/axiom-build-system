@@ -20,8 +20,8 @@ export default async function FitterLayout({
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
-      <header className="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between sticky top-0 z-10">
-        <span className="font-semibold text-slate-900">Axiom Build</span>
+      <header className="bg-white border-b border-slate-200 px-4 py-2 flex items-center justify-between sticky top-0 z-10">
+        <img src="/axiom-logo.png" alt="Axiom Group" className="h-9 w-auto" />
         <div className="flex items-center gap-3">
           <span className="text-sm text-slate-500">{profile.name}</span>
           <form action="/auth/signout" method="post">

@@ -29,7 +29,7 @@ export default async function PrintQRPage({
     return (
       <div className="p-8 text-center text-slate-500">
         No active QR code found for this job.{' '}
-        <a href={`/ops/jobs/${id}`} className="text-blue-600 underline">Go back</a>
+        <a href={`/ops/jobs/${id}`} className="text-[#5B2D8E] underline">Go back</a>
       </div>
     )
   }

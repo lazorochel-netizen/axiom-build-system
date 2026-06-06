@@ -20,7 +20,7 @@ type Fitter = {
 
 const STATUS_COLOURS: Record<string, string> = {
   pending:               'bg-slate-100 text-slate-600',
-  in_progress:           'bg-blue-100 text-blue-700',
+  in_progress:           'bg-blue-100 text-[#4A2478]',
   waiting_on_parts:      'bg-amber-100 text-amber-700',
   waiting_on_compliance: 'bg-purple-100 text-purple-700',
   completed:             'bg-green-100 text-green-700',
@@ -132,7 +132,7 @@ export default function TaskRow({
               <>
                 <span className="text-slate-300 text-xs">·</span>
                 {localAssigned.map(f => (
-                  <span key={f.id} className="text-xs bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded-full">{f.name}</span>
+                  <span key={f.id} className="text-xs bg-[#F3EEF9] text-[#4A2478] px-1.5 py-0.5 rounded-full">{f.name}</span>
                 ))}
               </>
             )}
@@ -158,7 +158,7 @@ export default function TaskRow({
               <input
                 value={taskName}
                 onChange={e => setTaskName(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]"
               />
             </div>
             <div>
@@ -166,7 +166,7 @@ export default function TaskRow({
               <select
                 value={category}
                 onChange={e => setCategory(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]"
               >
                 {TASK_CATEGORIES.map(c => <option key={c}>{c}</option>)}
               </select>
@@ -179,7 +179,7 @@ export default function TaskRow({
             <select
               value={status}
               onChange={e => setStatus(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]"
             >
               <option value="pending">Pending</option>
               <option value="in_progress">In Progress</option>
@@ -194,7 +194,7 @@ export default function TaskRow({
             {localAssigned.length > 0 && (
               <div className="flex flex-wrap gap-1 mb-2">
                 {localAssigned.map(f => (
-                  <span key={f.id} className="inline-flex items-center gap-1 bg-blue-50 border border-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                  <span key={f.id} className="inline-flex items-center gap-1 bg-[#F3EEF9] border border-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
                     {f.name}
                     <button
                       type="button"
@@ -209,7 +209,7 @@ export default function TaskRow({
               <select
                 onChange={handleAssignFitter}
                 defaultValue=""
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]"
               >
                 <option value="">+ Add fitter…</option>
                 {unassignedFitters.map(f => (
@@ -223,7 +223,7 @@ export default function TaskRow({
             <button
               type="submit"
               disabled={saving}
-              className="bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+              className="bg-[#5B2D8E] hover:bg-[#4A2478] disabled:opacity-60 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
             >
               {saving ? 'Saving…' : 'Save'}
             </button>

@@ -8,7 +8,7 @@ const STATUS_COLOURS: Record<BuildStatus, string> = {
   kit_designing:          'bg-orange-100 text-orange-700',
   kit_production:         'bg-orange-100 text-orange-700',
   kit_dispatched:         'bg-yellow-100 text-yellow-700',
-  in_progress:            'bg-blue-100 text-blue-700',
+  in_progress:            'bg-blue-100 text-[#4A2478]',
   waiting_on_parts:       'bg-amber-100 text-amber-700',
   waiting_on_compliance:  'bg-purple-100 text-purple-700',
   completed:              'bg-green-100 text-green-700',
@@ -112,7 +112,7 @@ export default async function JobsPage({
         <h1 className="text-xl font-semibold text-slate-900">All Jobs</h1>
         <Link
           href="/ops/jobs/new"
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+          className="bg-[#5B2D8E] hover:bg-[#4A2478] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
         >
           + New Job
         </Link>
@@ -145,7 +145,7 @@ export default async function JobsPage({
             name="q"
             defaultValue={q}
             placeholder="Search by job ID, vehicle, or customer…"
-            className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]"
           />
         </form>
 

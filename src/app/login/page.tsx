@@ -35,8 +35,9 @@ export default function LoginPage() {
 
         {/* Logo / Brand */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-slate-900">Axiom Build System</h1>
-          <p className="text-sm text-slate-500 mt-1">Axiom Group Australia</p>
+          <img src="/axiom-logo.png" alt="Axiom Group" className="h-14 w-auto mx-auto mb-3" />
+          
+          
         </div>
 
         {/* Login Card */}
@@ -55,7 +56,7 @@ export default function LoginPage() {
                 autoComplete="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E] focus:border-transparent"
                 placeholder="you@axiomgroup.com.au"
               />
             </div>
@@ -71,7 +72,7 @@ export default function LoginPage() {
                 autoComplete="current-password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E] focus:border-transparent"
                 placeholder="••••••••"
               />
             </div>
@@ -85,7 +86,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium py-2.5 rounded-lg text-sm transition-colors"
+              className="w-full bg-[#5B2D8E] hover:bg-[#4A2478] disabled:opacity-60 text-white font-medium py-2.5 rounded-lg text-sm transition-colors"
             >
               {loading ? 'Signing in…' : 'Sign in'}
             </button>

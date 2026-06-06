@@ -22,7 +22,7 @@ export default async function ManufacturerLayout({
     <div className="min-h-screen flex flex-col bg-slate-50">
       <header className="bg-white border-b border-slate-200 px-5 py-3 flex items-center justify-between sticky top-0 z-10">
         <div>
-          <span className="font-semibold text-slate-900">Axiom Group</span>
+          <img src="/axiom-logo.png" alt="Axiom Group" className="h-9 w-auto" />
           <span className="ml-2 text-xs font-medium bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">Manufacturer Portal</span>
         </div>
         <div className="flex items-center gap-3">

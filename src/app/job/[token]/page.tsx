@@ -100,7 +100,7 @@ export default async function FitterJobPage({
                   <label className="block text-sm font-medium text-slate-700 mb-2">Your Name</label>
                   <div className="space-y-2">
                     {assignedFitters.map((f: any) => (
-                      <label key={f.id} className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-colors">
+                      <label key={f.id} className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-[#F3EEF9] cursor-pointer transition-colors">
                         <input type="radio" name="fitter_id" value={f.id} required className="accent-blue-600" />
                         <span className="text-sm font-medium text-slate-900">{f.name}</span>
                       </label>
@@ -117,13 +117,13 @@ export default async function FitterJobPage({
                     maxLength={4}
                     required
                     placeholder="• • • •"
-                    className="w-full rounded-lg border border-slate-300 px-4 py-3 text-center text-xl tracking-[0.5em] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-slate-300 px-4 py-3 text-center text-xl tracking-[0.5em] focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]"
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
+                  className="w-full bg-[#5B2D8E] hover:bg-[#4A2478] text-white font-semibold py-3 rounded-xl transition-colors text-sm"
                 >
                   Check In →
                 </button>
@@ -168,7 +168,7 @@ export default async function FitterJobPage({
           </div>
           <div className="h-2.5 bg-slate-200 rounded-full overflow-hidden">
             <div
-              className="h-full bg-blue-500 rounded-full transition-all duration-500"
+              className="h-full bg-[#F3EEF9]0 rounded-full transition-all duration-500"
               style={{ width: total ? `${(done / total) * 100}%` : '0%' }}
             />
           </div>

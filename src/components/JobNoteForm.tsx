@@ -59,13 +59,13 @@ export default function JobNoteForm({ vehicleId, existingNotes }: {
               onChange={e => setNote(e.target.value)}
               placeholder="e.g. Customer requested upgraded solar panel — Renogy 200W instead of 175W"
               rows={3}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E] resize-none"
             />
             <div className="flex gap-2">
               <button
                 type="submit"
                 disabled={saving || !note.trim()}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                className="bg-[#5B2D8E] hover:bg-[#4A2478] disabled:opacity-50 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
               >
                 {saving ? 'Saving…' : saved ? '✓ Saved' : 'Save Note'}
               </button>

@@ -4,7 +4,7 @@ import { updateQuotationStatus } from '@/actions/invoices'
 
 const STATUS_COLOURS: Record<QuotationStatus, string> = {
   draft:    'bg-slate-100 text-slate-600',
-  sent:     'bg-blue-100 text-blue-700',
+  sent:     'bg-blue-100 text-[#4A2478]',
   accepted: 'bg-green-100 text-green-700',
   declined: 'bg-red-100 text-red-700',
 }
@@ -89,7 +89,7 @@ export default async function QuotationsPage() {
                     </span>
                   </div>
                   {q.vehicles && (
-                    <a href={`/ops/jobs/${q.vehicles.id}`} className="text-xs text-blue-600 hover:underline mt-0.5 inline-block">
+                    <a href={`/ops/jobs/${q.vehicles.id}`} className="text-xs text-[#5B2D8E] hover:underline mt-0.5 inline-block">
                       {q.vehicles.job_id} · {q.vehicles.vehicle_make} {q.vehicles.vehicle_model}
                     </a>
                   )}
@@ -101,7 +101,7 @@ export default async function QuotationsPage() {
                   <form action={updateQuotationStatus} className="flex gap-1 justify-end flex-wrap">
                     <input type="hidden" name="quotation_id" value={q.id} />
                     {q.status !== 'sent' && (
-                      <button name="status" value="sent" className="text-xs px-2 py-1 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors">Mark Sent</button>
+                      <button name="status" value="sent" className="text-xs px-2 py-1 rounded-lg bg-[#F3EEF9] text-[#4A2478] hover:bg-blue-100 transition-colors">Mark Sent</button>
                     )}
                     {q.status !== 'accepted' && (
                       <button name="status" value="accepted" className="text-xs px-2 py-1 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors">Accept</button>

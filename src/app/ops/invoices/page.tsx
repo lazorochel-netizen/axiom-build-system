@@ -5,7 +5,7 @@ import { createInvoice, convertQuotationToInvoice, createInvoiceFromBuildLog, up
 
 const STATUS_COLOURS: Record<InvoiceStatus, string> = {
   draft:   'bg-slate-100 text-slate-600',
-  sent:    'bg-blue-100 text-blue-700',
+  sent:    'bg-blue-100 text-[#4A2478]',
   paid:    'bg-green-100 text-green-700',
   overdue: 'bg-red-100 text-red-700',
 }
@@ -41,7 +41,7 @@ export default async function InvoicesPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-1">Job / Vehicle</label>
-              <select name="vehicle_id" className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <select name="vehicle_id" className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]">
                 <option value="">No job linked</option>
                 {(vehicles ?? []).map((v: any) => (
                   <option key={v.id} value={v.id}>{v.job_id} · {v.vehicle_make} {v.vehicle_model}</option>
@@ -50,7 +50,7 @@ export default async function InvoicesPage() {
             </div>
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-1">Customer</label>
-              <select name="customer_id" className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <select name="customer_id" className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]">
                 <option value="">No customer linked</option>
                 {(customers ?? []).map((c: any) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
@@ -60,7 +60,7 @@ export default async function InvoicesPage() {
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-600 mb-1">Due Date</label>
-            <input name="due_date" type="date" className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <input name="due_date" type="date" className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]" />
           </div>
 
           {/* Line items */}
@@ -69,9 +69,9 @@ export default async function InvoicesPage() {
             <div className="space-y-2">
               {[0, 1, 2, 3].map(i => (
                 <div key={i} className="grid grid-cols-[1fr_80px_100px] gap-2">
-                  <input name="item_desc" placeholder={i === 0 ? 'e.g. Conversion Kit — Hiace SLWB' : 'Description'} className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                  <input name="item_qty" type="number" step="0.01" defaultValue="1" placeholder="Qty" className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-right" />
-                  <input name="item_price" type="number" step="0.01" placeholder="Price" className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-right" />
+                  <input name="item_desc" placeholder={i === 0 ? 'e.g. Conversion Kit — Hiace SLWB' : 'Description'} className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]" />
+                  <input name="item_qty" type="number" step="0.01" defaultValue="1" placeholder="Qty" className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E] text-right" />
+                  <input name="item_price" type="number" step="0.01" placeholder="Price" className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E] text-right" />
                 </div>
               ))}
             </div>
@@ -80,13 +80,13 @@ export default async function InvoicesPage() {
 
           <div>
             <label className="block text-xs font-medium text-slate-600 mb-1">Manual Total (if no line items)</label>
-            <input name="total_amount" type="number" step="0.01" placeholder="e.g. 19999" className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <input name="total_amount" type="number" step="0.01" placeholder="e.g. 19999" className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]" />
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-600 mb-1">Notes</label>
-            <textarea name="notes" rows={2} placeholder="Optional notes" className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
+            <textarea name="notes" rows={2} placeholder="Optional notes" className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E] resize-none" />
           </div>
-          <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
+          <button type="submit" className="bg-[#5B2D8E] hover:bg-[#4A2478] text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
             Create Invoice
           </button>
         </form>
@@ -106,7 +106,7 @@ export default async function InvoicesPage() {
                 </div>
                 <form action={convertQuotationToInvoice} className="flex items-center gap-2 shrink-0">
                   <input type="hidden" name="quotation_id" value={q.id} />
-                  <input type="date" name="due_date" className="rounded-lg border border-slate-300 px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <input type="date" name="due_date" className="rounded-lg border border-slate-300 px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]" />
                   <button type="submit" className="bg-green-600 hover:bg-green-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap">
                     → Invoice
                   </button>
@@ -131,14 +131,14 @@ export default async function InvoicesPage() {
                 </div>
                 <form action={createInvoiceFromBuildLog} className="flex items-center gap-2 shrink-0">
                   <input type="hidden" name="build_log_id" value={log.id} />
-                  <select name="vehicle_id" className="rounded-lg border border-slate-300 px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <select name="vehicle_id" className="rounded-lg border border-slate-300 px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]">
                     <option value="">No job</option>
                     {(vehicles ?? []).map((v: any) => (
                       <option key={v.id} value={v.id}>{v.job_id}</option>
                     ))}
                   </select>
-                  <input type="date" name="due_date" className="rounded-lg border border-slate-300 px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                  <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap">
+                  <input type="date" name="due_date" className="rounded-lg border border-slate-300 px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]" />
+                  <button type="submit" className="bg-[#5B2D8E] hover:bg-[#4A2478] text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap">
                     Create Invoice
                   </button>
                 </form>
@@ -164,7 +164,7 @@ export default async function InvoicesPage() {
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLOURS[inv.status as InvoiceStatus]}`}>{inv.status}</span>
                   </div>
                   {inv.vehicles && (
-                    <a href={`/ops/jobs/${inv.vehicles.id}`} className="text-xs text-blue-600 hover:underline mt-0.5 inline-block">
+                    <a href={`/ops/jobs/${inv.vehicles.id}`} className="text-xs text-[#5B2D8E] hover:underline mt-0.5 inline-block">
                       {inv.vehicles.job_id} · {inv.vehicles.vehicle_make} {inv.vehicles.vehicle_model}
                     </a>
                   )}
@@ -177,7 +177,7 @@ export default async function InvoicesPage() {
                   <form action={updateInvoiceStatus} className="flex gap-1 justify-end flex-wrap">
                     <input type="hidden" name="invoice_id" value={inv.id} />
                     {inv.status !== 'sent' && (
-                      <button name="status" value="sent" className="text-xs px-2 py-1 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors">Mark Sent</button>
+                      <button name="status" value="sent" className="text-xs px-2 py-1 rounded-lg bg-[#F3EEF9] text-[#4A2478] hover:bg-blue-100 transition-colors">Mark Sent</button>
                     )}
                     {inv.status !== 'paid' && (
                       <button name="status" value="paid" className="text-xs px-2 py-1 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors">Mark Paid</button>

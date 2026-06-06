@@ -119,7 +119,7 @@ export default function FitterTaskCard({ task, vehicleId, token, completeAction,
             capture="environment"
             required
             onChange={handleFileChange}
-            className="block w-full text-sm text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            className="block w-full text-sm text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#F3EEF9] file:text-[#4A2478] hover:file:bg-blue-100"
           />
           {preview && (
             <img src={preview} alt="Preview" className="rounded-lg max-h-40 object-cover w-full" />
@@ -127,7 +127,7 @@ export default function FitterTaskCard({ task, vehicleId, token, completeAction,
           <button
             type="submit"
             disabled={uploading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-medium py-2 rounded-lg transition-colors"
+            className="w-full bg-[#5B2D8E] hover:bg-[#4A2478] disabled:opacity-60 text-white text-sm font-medium py-2 rounded-lg transition-colors"
           >
             {uploading ? 'Uploading…' : 'Submit Photo'}
           </button>

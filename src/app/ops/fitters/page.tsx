@@ -99,7 +99,7 @@ export default async function FittersPage({
                     inputMode="numeric"
                     maxLength={4}
                     placeholder={s.pin ? '••••  (update PIN)' : 'Set 4-digit PIN'}
-                    className="w-44 rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 tracking-widest"
+                    className="w-44 rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E] tracking-widest"
                   />
                   <button type="submit" className="text-xs font-medium px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors">
                     Save PIN
@@ -147,7 +147,7 @@ export default async function FittersPage({
                 name="name"
                 required
                 placeholder="e.g. Jake Smith"
-                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]"
               />
             </div>
             <div>
@@ -157,7 +157,7 @@ export default async function FittersPage({
                 type="email"
                 required
                 placeholder="jake@axiomgroup.com.au"
-                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]"
               />
             </div>
           </div>
@@ -171,7 +171,7 @@ export default async function FittersPage({
                 required
                 minLength={8}
                 placeholder="Min. 8 characters"
-                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]"
               />
             </div>
             <div>
@@ -182,7 +182,7 @@ export default async function FittersPage({
                 inputMode="numeric"
                 maxLength={4}
                 placeholder="e.g. 1234"
-                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 tracking-widest"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E] tracking-widest"
               />
             </div>
             <div>
@@ -190,7 +190,7 @@ export default async function FittersPage({
               <select
                 name="role"
                 required
-                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]"
               >
                 <option value="fitter">Fitter</option>
                 <option value="operations_manager">Operations Manager</option>
@@ -201,7 +201,7 @@ export default async function FittersPage({
 
           <button
             type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2.5 rounded-lg text-sm transition-colors"
+            className="bg-[#5B2D8E] hover:bg-[#4A2478] text-white font-medium px-5 py-2.5 rounded-lg text-sm transition-colors"
           >
             Create Account
           </button>

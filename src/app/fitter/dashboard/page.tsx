@@ -78,7 +78,7 @@ export default async function FitterDashboard({
               {activeQR && (
                 <a
                   href={`/job/${activeQR.token}`}
-                  className="text-xs font-medium text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors"
+                  className="text-xs font-medium text-[#5B2D8E] hover:text-[#4A2478] bg-[#F3EEF9] px-3 py-1.5 rounded-lg transition-colors"
                 >
                   Open job →
                 </a>
@@ -103,7 +103,7 @@ export default async function FitterDashboard({
                   </div>
                   <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                     task.status === 'completed'       ? 'bg-green-100 text-green-700' :
-                    task.status === 'in_progress'     ? 'bg-blue-100 text-blue-700'   :
+                    task.status === 'in_progress'     ? 'bg-blue-100 text-[#4A2478]'   :
                     task.status === 'waiting_on_parts' ? 'bg-amber-100 text-amber-700' :
                     'bg-slate-100 text-slate-500'
                   }`}>
