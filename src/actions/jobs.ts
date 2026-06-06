@@ -71,11 +71,10 @@ export async function createJob(formData: FormData) {
   })
 
   // 5. Auto-create tasks from templates
-  const { data: templates } = await supabase
-    .from('task_templates')
+  const { data: templates } = await (supabase.from('task_templates') as any)
     .select('task_name, task_category, task_order, role_required, is_required, photo_required')
     .eq('build_type', buildType)
-    .order('task_order', { ascending: true })
+    .order('task_order', { ascending: true }) as { data: { task_name: string; task_category: string; task_order: number; role_required: string; is_required: boolean; photo_required: boolean }[] | null }
 
   const tasksToInsert = (templates && templates.length > 0)
     ? templates.map(t => ({
