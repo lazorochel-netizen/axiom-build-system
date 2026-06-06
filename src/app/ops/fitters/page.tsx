@@ -16,9 +16,9 @@ const ROLE_LABEL: Record<string, string> = {
 export default async function FittersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ pin_error?: string }>
+  searchParams: Promise<{ pin_error?: string; staff_error?: string }>
 }) {
-  const { pin_error } = await searchParams
+  const { pin_error, staff_error } = await searchParams
   const supabase = await createClient()
 
   const { data: staff } = await supabase
@@ -27,8 +27,9 @@ export default async function FittersPage({
     .order('role')
     .order('name')
 
-  const managers = staff?.filter(s => s.role === 'operations_manager') ?? []
-  const fitters  = staff?.filter(s => s.role === 'fitter') ?? []
+  const managers      = staff?.filter(s => s.role === 'operations_manager') ?? []
+  const fitters       = staff?.filter(s => s.role === 'fitter') ?? []
+  const manufacturers = staff?.filter(s => s.role === 'manufacturer') ?? []
 
   return (
     <div className="max-w-2xl space-y-8">
@@ -37,6 +38,12 @@ export default async function FittersPage({
       {pin_error && (
         <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
           ⚠ PIN save failed: {decodeURIComponent(pin_error)}
+        </div>
+      )}
+
+      {staff_error && (
+        <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+          ⚠ Could not create account: {decodeURIComponent(staff_error)}
         </div>
       )}
 
@@ -70,21 +77,20 @@ export default async function FittersPage({
             {fitters.map((s: any) => (
               <div key={s.id} className="px-4 py-3 space-y-2">
                 <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-900">{s.name}</p>
-                  <p className="text-xs text-slate-400">{s.email}</p>
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">{s.name}</p>
+                    <p className="text-xs text-slate-400">{s.email}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {s.pin
+                      ? <span className="text-xs bg-green-50 text-green-700 border border-green-100 px-2 py-0.5 rounded-full font-medium">PIN set</span>
+                      : <span className="text-xs bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded-full font-medium">No PIN</span>
+                    }
+                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${ROLE_BADGE[s.role]}`}>
+                      {ROLE_LABEL[s.role]}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  {s.pin
-                    ? <span className="text-xs bg-green-50 text-green-700 border border-green-100 px-2 py-0.5 rounded-full font-medium">PIN set</span>
-                    : <span className="text-xs bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded-full font-medium">No PIN</span>
-                  }
-                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${ROLE_BADGE[s.role]}`}>
-                    {ROLE_LABEL[s.role]}
-                  </span>
-                </div>
-                </div>
-                {/* Set / update PIN inline */}
                 <form action={setFitterPin} className="flex items-center gap-2">
                   <input type="hidden" name="fitter_id" value={s.id} />
                   <input
@@ -104,6 +110,28 @@ export default async function FittersPage({
           </div>
         ) : (
           <p className="text-sm text-slate-400">No fitters added yet.</p>
+        )}
+      </section>
+
+      {/* Manufacturers */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Manufacturers</h2>
+        {manufacturers.length > 0 ? (
+          <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
+            {manufacturers.map((s: any) => (
+              <div key={s.id} className="flex items-center justify-between px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium text-slate-900">{s.name}</p>
+                  <p className="text-xs text-slate-400">{s.email}</p>
+                </div>
+                <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${ROLE_BADGE[s.role]}`}>
+                  {ROLE_LABEL[s.role]}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-slate-400">No manufacturers added yet.</p>
         )}
       </section>
 

@@ -6,7 +6,6 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 export async function createFitter(formData: FormData) {
-  // Verify caller is an operations_manager
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -25,7 +24,6 @@ export async function createFitter(formData: FormData) {
   const email    = formData.get('email') as string
   const password = formData.get('password') as string
 
-  // Use admin client to create the auth user
   const admin = createAdminClient()
   const { data: newUser, error: authError } = await admin.auth.admin.createUser({
     email,
@@ -36,7 +34,6 @@ export async function createFitter(formData: FormData) {
 
   if (authError) throw new Error(`Failed to create account: ${authError.message}`)
 
-  // Insert user profile (trigger may have already done this, use upsert to be safe)
   await (admin.from('users') as any).upsert({
     id:   newUser.user.id,
     name,
@@ -75,11 +72,13 @@ export async function createStaff(formData: FormData) {
     user_metadata: { name, role },
   })
 
-  if (authError) throw new Error(`Failed to create account: ${authError.message}`)
+  if (authError) {
+    redirect(`/ops/fitters?staff_error=${encodeURIComponent(authError.message)}`)
+  }
 
   const pin = (formData.get('pin') as string)?.replace(/\D/g, '').slice(0, 4) || null
 
-  await (admin.from('users') as any).upsert({
+  const { error: dbError } = await (admin.from('users') as any).upsert({
     id: newUser.user.id,
     name,
     email,
@@ -87,11 +86,15 @@ export async function createStaff(formData: FormData) {
     ...(pin ? { pin } : {}),
   })
 
+  if (dbError) {
+    redirect(`/ops/fitters?staff_error=${encodeURIComponent(dbError.message)}`)
+  }
+
   revalidatePath('/ops/fitters')
+  redirect('/ops/fitters')
 }
 
 export async function setFitterPin(formData: FormData) {
-  // Verify caller is ops manager via auth
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -103,7 +106,6 @@ export async function setFitterPin(formData: FormData) {
   if (!fitterId) redirect('/ops/fitters?pin_error=no_fitter')
   if (!pin || pin.length !== 4) redirect('/ops/fitters?pin_error=invalid_pin')
 
-  // Use createClient (untyped) with service role key directly — bypasses all type constraints
   const { createClient: createRawClient } = await import('@supabase/supabase-js')
   const adminRaw = createRawClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -133,8 +135,6 @@ export async function deleteFitter(fitterId: string) {
   if (!user) redirect('/login')
 
   const admin = createAdminClient()
-
-  // Delete auth user (cascades to public.users via FK)
   await admin.auth.admin.deleteUser(fitterId)
 
   revalidatePath('/ops/fitters')
