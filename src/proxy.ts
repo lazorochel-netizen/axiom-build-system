@@ -4,13 +4,14 @@ import { NextResponse, type NextRequest } from 'next/server'
 /**
  * Route protection rules:
  *
- *  /ops/**        → requires login + role = operations_manager
- *  /fitter/**     → requires login + role = fitter
- *  /job/[token]   → public (token-based, no login required)
- *  /portal/[token]→ public (token-based, no login required)
- *  /login         → redirects to /ops/dashboard if already logged in
+ *  /ops/**          → requires login + role = operations_manager
+ *  /fitter/**       → requires login + role = fitter
+ *  /manufacturer/** → requires login + role = manufacturer
+ *  /job/[token]     → public (token-based, no login required)
+ *  /portal/[token]  → public (token-based, no login required)
+ *  /login           → redirects to role dashboard if already logged in
  */
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -43,15 +44,23 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith('/portal/') ||
     pathname.startsWith('/login')
   ) {
-    // Redirect logged-in users away from /login based on role
+    // Redirect logged-in users away from /login to their role dashboard
     if (pathname === '/login' && user) {
       const { data: profile } = await supabase
         .from('users')
         .select('role')
         .eq('id', user.id)
         .single()
-      const dest = profile?.role === 'fitter' ? '/fitter/dashboard' : '/ops/dashboard'
-      return NextResponse.redirect(new URL(dest, request.url))
+
+      let dest = '/login'
+      if (profile?.role === 'fitter') dest = '/fitter/dashboard'
+      else if (profile?.role === 'manufacturer') dest = '/manufacturer/dashboard'
+      else if (profile?.role === 'operations_manager') dest = '/ops/dashboard'
+
+      // Only redirect if we have a known role — avoids loop on unknown/null role
+      if (dest !== '/login') {
+        return NextResponse.redirect(new URL(dest, request.url))
+      }
     }
     return supabaseResponse
   }
@@ -80,8 +89,15 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
+  // Manufacturer routes — manufacturer only
+  if (pathname.startsWith('/manufacturer') && role !== 'manufacturer') {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+
   return supabaseResponse
 }
+
+export default middleware
 
 export const config = {
   matcher: [

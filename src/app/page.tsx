@@ -26,5 +26,9 @@ export default async function RootPage() {
     redirect('/fitter/dashboard')
   }
 
+  if (profile?.role === 'manufacturer') {
+    redirect('/manufacturer/dashboard')
+  }
+
   redirect('/login')
 }
