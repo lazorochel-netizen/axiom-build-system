@@ -10,11 +10,10 @@ export default async function ManufacturerLayout({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('users')
+  const { data: profile } = await (supabase.from('users') as any)
     .select('name, role')
     .eq('id', user.id)
-    .single()
+    .single() as { data: { name?: string; role: string } | null }
 
   if (profile?.role !== 'manufacturer') redirect('/login')
 
