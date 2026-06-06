@@ -52,7 +52,6 @@ export async function updateKitStatus(formData: FormData) {
     }, { onConflict: 'vehicle_id' })
 
   if (error) {
-    console.error('[updateKitStatus]', error.message)
     return
   }
 

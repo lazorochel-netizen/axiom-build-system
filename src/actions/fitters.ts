@@ -121,11 +121,8 @@ export async function setFitterPin(formData: FormData) {
     .single()
 
   if (error) {
-    console.error('[setFitterPin] error:', error.message, error.code)
     redirect(`/ops/fitters?pin_error=${encodeURIComponent(error.message)}`)
   }
-
-  console.log('[setFitterPin] saved PIN for', data?.name)
   revalidatePath('/ops/fitters')
 }
 

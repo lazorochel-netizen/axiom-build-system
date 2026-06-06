@@ -21,14 +21,12 @@ const OPS  = process.env.EMAIL_OPS  ?? ''
 async function send(to: string | string[], subject: string, html: string) {
   const apiKey = process.env.RESEND_API_KEY
   if (!apiKey) {
-    console.warn('[email] RESEND_API_KEY not set — skipping email:', subject)
     return
   }
   try {
     const resend = new Resend(apiKey)
     await resend.emails.send({ from: FROM, to, subject, html })
-  } catch (err) {
-    console.error('[email] Failed to send:', subject, err)
+  } catch {
     // Never throw — email failures should not break the main action
   }
 }
