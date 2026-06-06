@@ -72,4 +72,10 @@ export async function sendCustomerUpdate(formData: FormData) {
     vehicle_id: vehicleId,
     user_id:    user.id,
     action:     'customer_email_sent',
-  
+    old_value:  null,
+    new_value:  { status: vehicle.build_status, has_message: !!customMessage },
+  })
+
+  revalidatePath(`/ops/jobs/${vehicleId}`)
+  redirect(`/ops/jobs/${vehicleId}?sent=1`)
+}
