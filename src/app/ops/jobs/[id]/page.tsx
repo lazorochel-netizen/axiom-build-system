@@ -42,8 +42,7 @@ export default async function JobDetailPage({
 
   // Fetch vehicle + fitters list + job fitters in parallel
   const [{ data: vehicle }, { data: fitters }, { data: jobFitters }] = await Promise.all([
-    supabase
-      .from('vehicles')
+    (supabase.from('vehicles') as any)
       .select(`
         *,
         customers ( name, email, phone ),
@@ -53,15 +52,13 @@ export default async function JobDetailPage({
         documents ( id, document_name, document_type, file_url, uploaded_at )
       `)
       .eq('id', id)
-      .single(),
-    supabase
-      .from('users')
+      .single() as Promise<{ data: any | null }>,
+    (supabase.from('users') as any)
       .select('id, name')
-      .eq('role', 'fitter'),
-    supabase
-      .from('job_fitters')
+      .eq('role', 'fitter') as Promise<{ data: { id: string; name: string }[] | null }>,
+    (supabase.from('job_fitters') as any)
       .select('user_id, users(id, name)')
-      .eq('vehicle_id', id),
+      .eq('vehicle_id', id) as Promise<{ data: { user_id: string; users: any }[] | null }>,
   ])
 
   if (!vehicle) notFound()
