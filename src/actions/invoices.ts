@@ -60,11 +60,10 @@ export async function convertQuotationToInvoice(formData: FormData) {
   const quotationId = formData.get('quotation_id') as string
   const dueDate     = formData.get('due_date') as string || null
 
-  const { data: q } = await supabase
-    .from('quotations')
+  const { data: q } = await (supabase.from('quotations') as any)
     .select('*')
     .eq('id', quotationId)
-    .single()
+    .single() as { data: Record<string, any> | null }
 
   if (!q) return
 

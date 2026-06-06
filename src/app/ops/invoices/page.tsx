@@ -21,8 +21,8 @@ export default async function InvoicesPage() {
     { data: customers },
     buildLogsResult,
   ] = await Promise.all([
-    supabase.from('invoices').select('*, vehicles(job_id, vehicle_make, vehicle_model, id), customers(name), invoice_items(id, description, quantity, unit_price)').order('created_at', { ascending: false }),
-    supabase.from('quotations').select('*, vehicles(job_id, vehicle_make, vehicle_model), customers(name)').in('status', ['draft', 'sent', 'accepted']).order('created_at', { ascending: false }),
+    (supabase.from('invoices') as any).select('*, vehicles(job_id, vehicle_make, vehicle_model, id), customers(name), invoice_items(id, description, quantity, unit_price)').order('created_at', { ascending: false }),
+    (supabase.from('quotations') as any).select('*, vehicles(job_id, vehicle_make, vehicle_model), customers(name)').in('status', ['draft', 'sent', 'accepted']).order('created_at', { ascending: false }),
     supabase.from('vehicles').select('id, job_id, vehicle_make, vehicle_model, customer_id').order('created_at', { ascending: false }),
     supabase.from('customers').select('id, name').order('name'),
     (admin.from('build_logs') as any).select('*').order('created_at', { ascending: false }).limit(20),

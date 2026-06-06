@@ -13,12 +13,10 @@ export default async function QuotationsPage() {
   const supabase = await createClient()
 
   const [{ data: quotations }, { data: buildLogs }] = await Promise.all([
-    supabase
-      .from('quotations')
+    (supabase.from('quotations') as any)
       .select('*, vehicles(job_id, vehicle_make, vehicle_model, id), customers(name)')
       .order('created_at', { ascending: false }),
-    supabase
-      .from('build_logs')
+    (supabase.from('build_logs') as any)
       .select('*')
       .order('created_at', { ascending: false })
       .limit(20),
