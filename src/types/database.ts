@@ -3,8 +3,10 @@
 // Auto-maintained: update when schema changes.
 // ============================================================
 
-export type UserRole = 'operations_manager' | 'fitter' | 'manufacturer'
+export type UserRole = 'operations_manager' | 'fitter' | 'manufacturer' | 'sales'
 export type KitStatus = 'designing' | 'production' | 'completed' | 'dispatched'
+export type LeadStage = 'new' | 'contacted' | 'qualified' | 'quoted' | 'won' | 'lost'
+export type LeadSource = 'website' | 'phone' | 'walk_in' | 'referral' | 'instagram' | 'facebook' | 'google' | 'other'
 export type BackorderStatus = 'requested' | 'acknowledged' | 'in_production' | 'dispatched' | 'received'
 export type BuildStatus = 'pending' | 'kit_designing' | 'kit_production' | 'kit_dispatched' | 'in_progress' | 'waiting_on_parts' | 'waiting_on_compliance' | 'completed' | 'delivered'
 export type TaskStatus = 'pending' | 'in_progress' | 'completed'
@@ -190,6 +192,27 @@ export interface BuildLog {
   updated_at: string
 }
 
+export interface Lead {
+  id: string
+  customer_name: string
+  customer_email: string | null
+  customer_phone: string | null
+  vehicle_make: string | null
+  vehicle_model: string | null
+  vehicle_year: number | null
+  build_type: string | null
+  budget: string | null
+  source: LeadSource
+  stage: LeadStage
+  notes: string | null
+  assigned_to: string | null
+  converted_vehicle_id: string | null
+  converted_at: string | null
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}
+
 // Supabase Database type wrapper (used by createClient<Database>)
 export type Database = {
   public: {
@@ -208,6 +231,7 @@ export type Database = {
       build_logs:     { Row: BuildLog;      Insert: Omit<BuildLog, 'id' | 'created_at' | 'updated_at'>; Update: Partial<BuildLog> }
       kit_orders:      { Row: KitOrder;      Insert: Omit<KitOrder, 'id' | 'created_at' | 'updated_at'>; Update: Partial<KitOrder> }
       kit_backorders:  { Row: KitBackorder; Insert: Omit<KitBackorder, 'id' | 'created_at' | 'updated_at'>; Update: Partial<KitBackorder> }
+      leads:           { Row: Lead;         Insert: Omit<Lead, 'id' | 'created_at' | 'updated_at'>; Update: Partial<Lead> }
       invoice_items:   { Row: InvoiceItem;  Insert: Omit<InvoiceItem, 'id' | 'created_at'>; Update: Partial<InvoiceItem> }
     }
     Enums: {
@@ -217,6 +241,8 @@ export type Database = {
       quotation_status: QuotationStatus
       invoice_status:   InvoiceStatus
       backorder_status: BackorderStatus
+      lead_stage:       LeadStage
+      lead_source:      LeadSource
     }
   }
 }

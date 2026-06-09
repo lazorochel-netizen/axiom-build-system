@@ -29,6 +29,10 @@ export default async function RootPage() {
     redirect('/manufacturer/dashboard')
   }
 
+  if (profile?.role === 'sales') {
+    redirect('/sales/dashboard')
+  }
+
   // Unknown or null role — send to login
   redirect('/login')
 }
