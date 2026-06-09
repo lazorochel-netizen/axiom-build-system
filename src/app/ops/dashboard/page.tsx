@@ -146,7 +146,7 @@ export default async function OpsDashboard({
       .from('kit_backorders')
       .select('*')
       .neq('status', 'received')
-      .order('created_at', { ascending: false }) as Promise<{ data: KitBackorder[] | null }>,
+      .order('created_at', { ascending: false }) as unknown as Promise<{ data: KitBackorder[] | null }>,
   ])
 
   const active = sortVehicles((activeRaw ?? []) as ActiveVehicle[], currentSort)
