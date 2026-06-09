@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import ManufacturerNav from '@/components/ManufacturerNav'
 
 export default async function ManufacturerLayout({
   children,
@@ -20,7 +21,7 @@ export default async function ManufacturerLayout({
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
       <header className="bg-white border-b border-slate-200 px-5 py-3 flex items-center justify-between sticky top-0 z-10">
-        <div>
+        <div className="flex items-center">
           <img src="/axiom-logo.png" alt="Axiom Group" className="h-9 w-auto" />
           <span className="ml-2 text-xs font-medium bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">Manufacturer Portal</span>
         </div>
@@ -33,6 +34,9 @@ export default async function ManufacturerLayout({
           </form>
         </div>
       </header>
+
+      <ManufacturerNav />
+
       <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-6">
         {children}
       </main>

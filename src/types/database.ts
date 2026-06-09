@@ -5,6 +5,7 @@
 
 export type UserRole = 'operations_manager' | 'fitter' | 'manufacturer'
 export type KitStatus = 'designing' | 'production' | 'completed' | 'dispatched'
+export type BackorderStatus = 'requested' | 'acknowledged' | 'in_production' | 'dispatched' | 'received'
 export type BuildStatus = 'pending' | 'kit_designing' | 'kit_production' | 'kit_dispatched' | 'in_progress' | 'waiting_on_parts' | 'waiting_on_compliance' | 'completed' | 'delivered'
 export type TaskStatus = 'pending' | 'in_progress' | 'completed'
 export type QuotationStatus = 'draft' | 'sent' | 'accepted' | 'declined'
@@ -163,6 +164,19 @@ export interface KitOrder {
   updated_at: string
 }
 
+export interface KitBackorder {
+  id: string
+  kit_type: string
+  quantity: number
+  status: BackorderStatus
+  ops_notes: string | null
+  manufacturer_notes: string | null
+  created_by: string | null
+  received_at: string | null
+  created_at: string
+  updated_at: string
+}
+
 export interface BuildLog {
   id: string
   name: string
@@ -192,8 +206,9 @@ export type Database = {
       photos:         { Row: Photo;         Insert: Omit<Photo, 'id' | 'uploaded_at'>; Update: Partial<Photo> }
       activity_log:   { Row: ActivityLog;   Insert: Omit<ActivityLog, 'id' | 'created_at'>; Update: never }
       build_logs:     { Row: BuildLog;      Insert: Omit<BuildLog, 'id' | 'created_at' | 'updated_at'>; Update: Partial<BuildLog> }
-      kit_orders:     { Row: KitOrder;     Insert: Omit<KitOrder, 'id' | 'created_at' | 'updated_at'>; Update: Partial<KitOrder> }
-      invoice_items:  { Row: InvoiceItem;   Insert: Omit<InvoiceItem, 'id' | 'created_at'>; Update: Partial<InvoiceItem> }
+      kit_orders:      { Row: KitOrder;      Insert: Omit<KitOrder, 'id' | 'created_at' | 'updated_at'>; Update: Partial<KitOrder> }
+      kit_backorders:  { Row: KitBackorder; Insert: Omit<KitBackorder, 'id' | 'created_at' | 'updated_at'>; Update: Partial<KitBackorder> }
+      invoice_items:   { Row: InvoiceItem;  Insert: Omit<InvoiceItem, 'id' | 'created_at'>; Update: Partial<InvoiceItem> }
     }
     Enums: {
       user_role:        UserRole
@@ -201,6 +216,7 @@ export type Database = {
       task_status:      TaskStatus
       quotation_status: QuotationStatus
       invoice_status:   InvoiceStatus
+      backorder_status: BackorderStatus
     }
   }
 }

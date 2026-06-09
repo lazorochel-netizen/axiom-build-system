@@ -1,7 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
-import type { BuildStatus } from '@/types/database'
+import { createClient as createRawClient } from '@supabase/supabase-js'
+import type { BuildStatus, BackorderStatus, KitBackorder } from '@/types/database'
 import Link from 'next/link'
 import SortSelect from '@/components/SortSelect'
+import { createBackorder, receiveBackorder } from '@/actions/kit-backorders'
+import DeleteBackorderButton from '@/components/DeleteBackorderButton'
 
 const DONE_PAGE_SIZE = 10
 
@@ -41,6 +44,22 @@ const SORT_OPTIONS = [
   { value: 'priority', label: 'Priority (overdue first)' },
   { value: 'customer', label: 'Customer (A–Z)' },
 ]
+
+const BACKORDER_STATUS_LABELS: Record<BackorderStatus, string> = {
+  requested:    'Requested',
+  acknowledged: 'Acknowledged',
+  in_production:'In Production',
+  dispatched:   'Dispatched',
+  received:     'Received',
+}
+
+const BACKORDER_STATUS_COLOURS: Record<BackorderStatus, string> = {
+  requested:    'bg-slate-100 text-slate-600',
+  acknowledged: 'bg-blue-100 text-blue-700',
+  in_production:'bg-orange-100 text-orange-700',
+  dispatched:   'bg-yellow-100 text-yellow-700',
+  received:     'bg-green-100 text-green-700',
+}
 
 type ActiveVehicle = {
   id: string
@@ -106,8 +125,13 @@ export default async function OpsDashboard({
   const donePage = Math.max(0, parseInt(page ?? '0', 10))
   const currentSort = SORT_OPTIONS.find(o => o.value === sort) ? sort! : 'newest'
   const supabase = await createClient()
+  const admin = createRawClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  )
 
-  const [{ data: activeRaw }, { data: done, count: doneCount }, { data: allStatuses }] = await Promise.all([
+  const [{ data: activeRaw }, { data: done, count: doneCount }, { data: allStatuses }, { data: backordersRaw }] = await Promise.all([
     (supabase.from('vehicles') as any)
       .select('id, job_id, vehicle_make, vehicle_model, vehicle_year, build_status, build_type, estimated_completion_date, created_at, customers(name)')
       .not('build_status', 'in', '("completed","delivered")') as Promise<{ data: ActiveVehicle[] | null }>,
@@ -118,10 +142,16 @@ export default async function OpsDashboard({
       .range(donePage * DONE_PAGE_SIZE, (donePage + 1) * DONE_PAGE_SIZE - 1) as Promise<{ data: { id: string; job_id: string; vehicle_make: string; vehicle_model: string; vehicle_year: number | null; build_status: string }[] | null; count: number | null }>,
     (supabase.from('vehicles') as any)
       .select('build_status') as Promise<{ data: { build_status: string }[] | null }>,
+    admin
+      .from('kit_backorders')
+      .select('*')
+      .neq('status', 'received')
+      .order('created_at', { ascending: false }) as Promise<{ data: KitBackorder[] | null }>,
   ])
 
   const active = sortVehicles((activeRaw ?? []) as ActiveVehicle[], currentSort)
   const baseUrl = donePage > 0 ? `/ops/dashboard?page=${donePage}` : '/ops/dashboard'
+  const backorders = (backordersRaw ?? []) as KitBackorder[]
 
   return (
     <div className="space-y-6 max-w-5xl">
@@ -249,6 +279,123 @@ export default async function OpsDashboard({
           )}
         </section>
       )}
+      {/* Kit Restocking / Back Orders */}
+      <section>
+        <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">
+          Kit Restocking
+          {backorders.length > 0 && (
+            <span className="text-slate-400 font-normal"> ({backorders.length} open)</span>
+          )}
+        </h2>
+
+        {/* Create new back order */}
+        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden mb-4">
+          <div className="px-4 py-3 border-b border-slate-100">
+            <p className="text-sm font-medium text-slate-700">New Restock Request</p>
+          </div>
+          <form action={createBackorder} className="px-4 py-4 space-y-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div className="col-span-2">
+                <label className="block text-xs font-medium text-slate-600 mb-1">
+                  Kit / Component <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="kit_type"
+                  required
+                  placeholder="e.g. Canopy EV Kit, Bull Bar Pack"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Qty needed</label>
+                <input
+                  type="number"
+                  name="quantity"
+                  min="1"
+                  defaultValue="1"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E]"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1">
+                Notes to Manufacturer{' '}
+                <span className="text-slate-400 font-normal">(optional — urgency, specs, job references)</span>
+              </label>
+              <textarea
+                name="ops_notes"
+                rows={2}
+                placeholder="e.g. Urgent — 3 pending jobs waiting. Needs custom solar bracket weld."
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B2D8E] resize-none"
+              />
+            </div>
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                className="bg-[#5B2D8E] hover:bg-[#4A2478] text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors"
+              >
+                Send to Manufacturer
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* Open back orders list */}
+        {backorders.length === 0 ? (
+          <p className="text-sm text-slate-400">No open restock requests.</p>
+        ) : (
+          <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
+            {backorders.map(b => (
+              <div key={b.id} className="px-4 py-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-medium text-slate-900">{b.kit_type}</p>
+                      <span className="text-xs text-slate-400">× {b.quantity}</span>
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${BACKORDER_STATUS_COLOURS[b.status]}`}>
+                        {BACKORDER_STATUS_LABELS[b.status]}
+                      </span>
+                    </div>
+                    {b.ops_notes && (
+                      <p className="text-xs text-slate-500 mt-0.5">{b.ops_notes}</p>
+                    )}
+                    {b.manufacturer_notes && (
+                      <p className="text-xs text-blue-700 bg-blue-50 rounded px-2 py-1 mt-1">
+                        <span className="font-medium">Manufacturer: </span>{b.manufacturer_notes}
+                      </p>
+                    )}
+                    <p className="text-xs text-slate-400 mt-1">
+                      Requested {new Date(b.created_at).toLocaleDateString('en-AU', {
+                        day: 'numeric', month: 'short', year: 'numeric',
+                      })}
+                      {b.updated_at !== b.created_at && (
+                        <> · Updated {new Date(b.updated_at).toLocaleDateString('en-AU', {
+                          day: 'numeric', month: 'short', year: 'numeric',
+                        })}</>
+                      )}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {b.status === 'dispatched' && (
+                      <form action={receiveBackorder}>
+                        <input type="hidden" name="id" value={b.id} />
+                        <button
+                          type="submit"
+                          className="text-xs font-medium bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg transition-colors"
+                        >
+                          Mark Received
+                        </button>
+                      </form>
+                    )}
+                    <DeleteBackorderButton id={b.id} />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   )
 }
