@@ -42,7 +42,8 @@ export async function middleware(request: NextRequest) {
   if (
     pathname.startsWith('/job/') ||
     pathname.startsWith('/portal/') ||
-    pathname.startsWith('/login')
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/api/leads/public')
   ) {
     // Redirect logged-in users away from /login to their role dashboard
     if (pathname === '/login' && user) {
@@ -56,6 +57,7 @@ export async function middleware(request: NextRequest) {
       if (profile?.role === 'fitter') dest = '/fitter/dashboard'
       else if (profile?.role === 'manufacturer') dest = '/manufacturer/dashboard'
       else if (profile?.role === 'operations_manager') dest = '/ops/dashboard'
+      else if (profile?.role === 'sales') dest = '/sales/dashboard'
 
       // Only redirect if we have a known role — avoids loop on unknown/null role
       if (dest !== '/login') {
@@ -91,6 +93,11 @@ export async function middleware(request: NextRequest) {
 
   // Manufacturer routes — manufacturer only
   if (pathname.startsWith('/manufacturer') && role !== 'manufacturer') {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  // Sales routes — sales only
+  if (pathname.startsWith('/sales') && role !== 'sales') {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
