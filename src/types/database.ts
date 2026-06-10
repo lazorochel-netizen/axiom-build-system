@@ -7,6 +7,7 @@ export type UserRole = 'operations_manager' | 'fitter' | 'manufacturer' | 'sales
 export type KitStatus = 'designing' | 'production' | 'completed' | 'dispatched'
 export type LeadStage = 'new' | 'contacted' | 'qualified' | 'quoted' | 'won' | 'lost'
 export type LeadSource = 'website' | 'phone' | 'walk_in' | 'referral' | 'instagram' | 'facebook' | 'google' | 'other'
+export type LeadTemperature = 'warm' | 'cold'
 export type BackorderStatus = 'requested' | 'acknowledged' | 'in_production' | 'dispatched' | 'received'
 export type BuildStatus = 'pending' | 'kit_designing' | 'kit_production' | 'kit_dispatched' | 'in_progress' | 'waiting_on_parts' | 'waiting_on_compliance' | 'completed' | 'delivered'
 export type TaskStatus = 'pending' | 'in_progress' | 'completed'
@@ -204,6 +205,7 @@ export interface Lead {
   budget: string | null
   source: LeadSource
   stage: LeadStage
+  temperature: LeadTemperature | null
   notes: string | null
   assigned_to: string | null
   converted_vehicle_id: string | null

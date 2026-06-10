@@ -21,6 +21,7 @@ import { createClient as createRawClient } from '@supabase/supabase-js'
  *   build_type:     string
  *   budget:         string
  *   source:         'website' | 'facebook' | 'instagram' | 'google' | 'phone' | 'walk_in' | 'referral' | 'other'
+ *   temperature:    'warm' | 'cold'
  *   notes:          string
  * }
  *
@@ -75,6 +76,10 @@ export async function POST(req: NextRequest) {
   const rawSource = (body.source as string) ?? ''
   const source = VALID_SOURCES.includes(rawSource) ? rawSource : 'other'
 
+  // Whitelist valid temperatures
+  const rawTemp = (body.temperature as string) ?? ''
+  const temperature = rawTemp === 'warm' || rawTemp === 'cold' ? rawTemp : null
+
   // ── 3. Insert lead ────────────────────────────────────────
   const admin = createRawClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -95,6 +100,7 @@ export async function POST(req: NextRequest) {
       budget:         (body.budget        as string)?.trim() || null,
       source,
       stage:          'new',
+      temperature,
       notes:          (body.notes         as string)?.trim() || null,
     })
     .select('id')

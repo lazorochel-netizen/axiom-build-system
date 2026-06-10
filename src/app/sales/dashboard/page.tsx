@@ -147,6 +147,15 @@ export default async function SalesDashboard({
                         day: 'numeric', month: 'short',
                       })}
                     </p>
+                    {lead.temperature && (
+                      <span className={`inline-block mt-1 text-xs font-semibold px-2 py-0.5 rounded-full ${
+                        lead.temperature === 'warm'
+                          ? 'bg-orange-100 text-orange-700'
+                          : 'bg-blue-50 text-blue-500'
+                      }`}>
+                        {lead.temperature === 'warm' ? '🔥 Warm' : '❄️ Cold'}
+                      </span>
+                    )}
                   </div>
                   {stage && (
                     <span className={`shrink-0 ml-3 text-xs font-medium px-2.5 py-1 rounded-full ${stage.colour}`}>

@@ -77,11 +77,22 @@ export default async function LeadDetailPage({
             {lead.build_type && ` · ${lead.build_type}`}
           </p>
         </div>
-        {stage && (
-          <span className={`shrink-0 text-sm font-medium px-3 py-1 rounded-full ${stage.colour}`}>
-            {stage.label}
-          </span>
-        )}
+        <div className="flex items-center gap-2 shrink-0">
+          {lead.temperature && (
+            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+              lead.temperature === 'warm'
+                ? 'bg-orange-100 text-orange-700'
+                : 'bg-blue-50 text-blue-500'
+            }`}>
+              {lead.temperature === 'warm' ? '🔥 Warm' : '❄️ Cold'}
+            </span>
+          )}
+          {stage && (
+            <span className={`text-sm font-medium px-3 py-1 rounded-full ${stage.colour}`}>
+              {stage.label}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Won banner */}
